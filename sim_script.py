@@ -1,15 +1,25 @@
 import orhelper
 from pathlib import Path
+import sys
 
-# 1. Point this to the exact filename you downloaded
-jar_path = Path(__file__).parent / 'OpenRocket-23.09.jar' 
+# 1. Path to your verified JAR
+jar_path = Path(__file__).parent / 'OpenRocket-23.09.jar'
 
-# 2. Initialize the bridge
-with orhelper.OpenRocketInstance(jar_path):
-    orh = orhelper.Helper()
-    
-    # 3. Load your rocket file (must be in the same folder)
-    # doc = orh.load_doc('my_rocket.ork')
-    
-    # Run simulation logic here...
-    print("OpenRocket backend is now connected to Python!")
+print("Initializing OpenRocket...")
+
+# 2. Start the instance and capture it as 'instance'
+try:
+    with orhelper.OpenRocketInstance(str(jar_path)) as instance:
+        # 3. Pass the instance to the helper
+        orh = orhelper.Helper(instance)
+        
+        print("✅ SUCCESS: OpenRocket backend is connected and ready!")
+        
+        # Example: Load a rocket (uncomment if you have a file)
+        # doc = orh.load_doc('my_rocket.ork')
+        # sim = doc.get_simulation(0)
+        # orh.run_simulation(sim)
+        # print("Simulation complete!")
+
+except Exception as e:
+    print(f"❌ Error: {e}")
