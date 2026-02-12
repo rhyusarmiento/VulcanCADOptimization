@@ -14,6 +14,7 @@ try:
         orh = orhelper.Helper(instance)
         print("✅ SUCCESS: OpenRocket backend is connected and ready!")
 
+        
         # Load the rocket
         if not rocket_file.exists():
             print(f"❌ Warning: Could not find {rocket_file}")

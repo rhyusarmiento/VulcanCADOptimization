@@ -1,3 +1,6 @@
+import orhelper
+import jpype
+
 # Access the Java Enum directly
 def list_flight_data_types():        
     try:
