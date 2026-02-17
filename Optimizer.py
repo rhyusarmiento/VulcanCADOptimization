@@ -28,6 +28,8 @@ class Optimizer:
         self.sim = self.doc.getSimulation(0)
         self.FlightDataType = jpype.JPackage("net").sf.openrocket.simulation.FlightDataType
         self.rocket = self.doc.getRocket()
+        self.components = []
+        self.setup_components(self.rocket)
         # Search Space
         self.space = [
             Real(0.4, 2.5, name='top_tube_length'),    # Tube m
@@ -39,10 +41,8 @@ class Optimizer:
             Real(-0.20, 0.0, name='fin_position'),   # Position m (Negative is forward)
             Real(0.0, 1.0, name='nose_mass'),      # Nose Mass kg
             Real(0.0, 1.0, name='vary_mass'),      # Vary Mass kg
-            Real(0.05, self.rocket.getLength(), name='vary_position')       # Position m
+            Real(0.0, self.rocket.getLength() - 0.026, name='vary_position')       # Position m
         ]
-        self.components = []
-        self.setup_components(self.rocket)
 
     def setup_components(self, component):
         name = str(component.getName())
@@ -61,6 +61,7 @@ class Optimizer:
     def run_optimizer(self, TARGET_ALTITUDE, iterations=50):
         print(f"🚀 Starting Optimization Run ({iterations} Iterations)...")
         best_apogee = 0.0
+
         @use_named_args(self.space)
         def objective_function(top_tube_length, fin_height, root_chord, tip_chord, 
                                fin_sweep, fin_angle, fin_position, nose_mass, vary_mass, vary_position):
@@ -74,12 +75,18 @@ class Optimizer:
                 # --- FINS ---
                 fins = self.get_component("Trapezoidal Fin Set")
                 if fins:
-                    fins.setSpan(fin_height)
+                    fins.setHeight(fin_height)
                     fins.setRootChord(root_chord)
                     fins.setTipChord(tip_chord)
-                    fins.setSweepLength(fin_sweep)
+                    fins.setSweep(fin_sweep)
                     fins.setCantAngle(fin_angle) 
-                    fins.setPositionValue(fin_position)
+                    # Set Position (Relative to BOTTOM)
+                    parent = fins.getParent()
+                    if parent:
+                        tube_len = parent.getLength()
+                        pos_from_top = tube_len + fin_position - root_chord
+                        if pos_from_top < 0: pos_from_top = 0 
+                        fins.setAxialOffset(pos_from_top)
 
                 # --- NOSE BALLAST ---
                 ballast = self.get_component("Nose Mass")
@@ -88,9 +95,9 @@ class Optimizer:
 
                 # --- Vary Mass & Position ---
                 custom_vary_mass= self.get_component("Vary Mass")
-                if custom_vary_mass: 
+                if custom_vary_mass:
                     custom_vary_mass.setMass(vary_mass)
-                    custom_vary_mass.setPositionValue(vary_position)
+                    custom_vary_mass.setAxialOffset(vary_position)
 
             except Exception as e:
                 print(f"❌ Design Error: {e}")
@@ -107,6 +114,7 @@ class Optimizer:
                 # vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
                 
                 apogee = max(alt_arr)
+                nonlocal best_apogee
                 if apogee > best_apogee:
                     best_apogee = apogee
             except Exception as e:

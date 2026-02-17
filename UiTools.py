@@ -1,13 +1,18 @@
-from skopt.plots import plot_objective, plot_convergence
-import matplotlib.pyplot as plt
 import math
+import matplotlib
+# CRITICAL: Switch backend to 'Agg' before importing pyplot
+# This prevents "UserWarning: Matplotlib is currently using agg..." or crashes
+matplotlib.use('Agg') 
+import matplotlib.pyplot as plt
+from skopt.plots import plot_convergence, plot_objective
 
 def report_results(results):
+    # --- 1. PRINT TEXT REPORT ---
     print("\n" + "="*50)
     print("✅ OPTIMAL DESIGN FOUND")
     print("="*50)
     
-    # 1. Geometry (Tube & Fins)
+    # Geometry (Tube & Fins)
     print("🚀 GEOMETRY")
     print(f"   Tube Length:      {results.x[0]*100:.2f} cm")
     print(f"   Fin Span:         {results.x[1]*100:.2f} cm")
@@ -17,31 +22,35 @@ def report_results(results):
     print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
     print(f"   Fin Position:     {results.x[6]*100:.2f} cm (Relative)")
 
-    # 2. Mass & Balance
+    # Mass & Balance
     print("\n⚖️ MASS & BALANCE")
     print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
-    print(f"   Payload Mass:     {results.x[8]*1000:.0f} g")
-    print(f"   Payload Position: {results.x[9]*100:.2f} cm")
+    print(f"   Var Mass:     {results.x[8]*1000:.0f} g")
+    print(f"   Var Position: {results.x[9]*100:.2f} cm")
     
     print("-" * 50)
     print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")
 
-    # --- VISUALIZATION ---
-    print("\n📊 Generating Partial Dependence Plots...")
+    # --- 2. SAVE PLOTS TO DISK ---
+    print("\n📊 Saving Visualization Files...")
     
     # Plot 1: Convergence
+    print("   -> Saving 'opt_convergence.png'...")
     plt.figure(figsize=(10, 6))
     plot_convergence(results)
-    plt.title("Optimization Convergence (Did we find a minimum?)")
-    plt.show()
+    plt.title("Optimization Convergence")
+    plt.savefig("opt_convergence.png", dpi=100) # Save file
+    plt.close() # Close memory buffer
 
     # Plot 2: The Landscape
-    # Note: 10 variables creates a massive 10x10 plot matrix. 
-    # We increase figsize to handle the density.
-    plt.figure(figsize=(16, 16)) 
+    print("   -> Saving 'opt_landscape.png' (This may take a moment)...")
+    plt.figure(figsize=(20, 20)) # Massive size for 10x10 matrix
     
-    # Optional: Plot only the most impactful variables if it's too crowded
-    # plot_objective(results, dimensions=["top_tube_length", "fin_height", "root_chord", "nose_mass"], n_points=40)
+    # Plotting all 10 variables is very dense. 
+    # Use 'dimensions' to pick specific names if you defined them in 'results.space'
+    plot_objective(results, n_points=20) 
     
-    plot_objective(results, n_points=30) 
-    plt.show()
+    plt.savefig("opt_landscape.png", dpi=100)
+    plt.close()
+    
+    print("✅ Done! Check your project folder for the .png files.")
