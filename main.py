@@ -37,24 +37,12 @@ try:
             sim = doc.getSimulation(0)
             FlightDataType = jpype.JPackage("net").sf.openrocket.simulation.FlightDataType
 
-            tube_current_length = 0.0
-            tube_length = 1.5
-            try:
-                Opt = Optimizer(instance, str(ROCKET_FILE))
-                print(f"components: {[name for name, comp in Opt.components]}")
-                tube = Opt.get_component("Top Tube")
-                if tube: tube_current_length = tube.getLength()
-                if tube: tube.setLength(tube_length)
-                print(f"Set to {tube.getLength():.2f} m")
-                tube.setLength(tube_current_length) # Reset to original
-            except Exception as e:
-                print(f"❌ Design Error: {e}")
-                traceback.print_exc()
-            
             # Run the Optimizer
-            # results = Optimizer.run_optimizer(instance, str(ROCKET_FILE), TARGET_ALTITUDE)
-            # # Report Results
-            # UiTools.report_results(results)
+            Opt = Optimizer(instance, str(ROCKET_FILE))
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=50)
+            print(f"✅ Optimization Complete! Best Result: {results.fun:.2f} ft error")
+            # Report Results
+            UiTools.report_results(results)
 
 except Exception as e:
     print(f"❌ Error: {e}")
