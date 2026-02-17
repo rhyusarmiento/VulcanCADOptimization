@@ -4,6 +4,7 @@ import sys
 import jpype
 from Optimizer import Optimizer
 import UiTools
+import traceback
 
 # 1. Path to your verified JAR
 JAR_PATH = Path(__file__).parent / 'OpenRocket-23.09.jar'
@@ -40,13 +41,15 @@ try:
             tube_length = 1.5
             try:
                 Opt = Optimizer(instance, str(ROCKET_FILE))
-                tube = Optimizer.get_component("Top Tube")
+                print(f"components: {[name for name, comp in Opt.components]}")
+                tube = Opt.get_component("Top Tube")
                 if tube: tube_current_length = tube.getLength()
                 if tube: tube.setLength(tube_length)
                 print(f"Set to {tube.getLength():.2f} m")
                 tube.setLength(tube_current_length) # Reset to original
             except Exception as e:
                 print(f"❌ Design Error: {e}")
+                traceback.print_exc()
             
             # Run the Optimizer
             # results = Optimizer.run_optimizer(instance, str(ROCKET_FILE), TARGET_ALTITUDE)

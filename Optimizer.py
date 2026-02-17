@@ -37,13 +37,14 @@ class Optimizer:
             Real(0.2, 0.8, name='avbay_pos')       # Position: 0.2m to 0.8m
         ]
         self.components = []
+        self.setup_components(self.rocket)
 
-    def setup_component(self, component):
+    def setup_components(self, component):
         name = str(component.getName())
         self.components.append((name, component))
         
         for child in component.getChildren():
-            self.components(child)
+            self.setup_components(child)
 
     def get_component(self, name):
         for comp_name, comp in self.components:
