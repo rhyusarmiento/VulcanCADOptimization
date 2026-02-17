@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 import jpype
 import Optimizer
+import UiTools
 
 # 1. Path to your verified JAR
 JAR_PATH = Path(__file__).parent / 'OpenRocket-23.09.jar'
@@ -27,9 +28,8 @@ try:
             
             # Run the Optimizer
             results = Optimizer.run_optimizer(instance, str(ROCKET_FILE), TARGET_ALTITUDE)
-
-            # run simulation and print results
-            # optimise on stats
+            # Report Results
+            UiTools.report_results(results)
 
 except Exception as e:
     print(f"❌ Error: {e}")
