@@ -25,7 +25,7 @@ class Optimizer:
     def __init__(self, rocket_instance, ROCKET_FILE):
         self.orh = orhelper.Helper(rocket_instance)
         self.doc = self.orh.load_doc(ROCKET_FILE)
-        self.sim = self.doc.get_simulation(0)
+        self.sim = self.doc.getSimulation(0)
         self.FlightDataType = jpype.JPackage("net").sf.openrocket.simulation.FlightDataType
         self.rocket = self.doc.getRocket()
         # Search Space
