@@ -40,9 +40,9 @@ try:
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
             results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=50)
-            print(f"✅ Optimization Complete! Best Result: {results.fun:.2f} ft error")
+            print(f"✅ Optimization Complete! Best Apogee: {results[1].fun:.2f} ft")
             # Report Results
-            UiTools.report_results(results)
+            UiTools.report_results(results[0])
 
 except Exception as e:
     print(f"❌ Error: {e}")

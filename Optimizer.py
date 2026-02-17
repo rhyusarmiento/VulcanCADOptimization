@@ -60,6 +60,7 @@ class Optimizer:
     # --- RUN OPTIMIZATION ---
     def run_optimizer(self, TARGET_ALTITUDE, iterations=50):
         print(f"🚀 Starting Optimization Run ({iterations} Iterations)...")
+        best_apogee = 0.0
         @use_named_args(self.space)
         def objective_function(top_tube_length, fin_height, root_chord, tip_chord, 
                                fin_sweep, fin_angle, fin_position, nose_mass, vary_mass, vary_position):
@@ -106,6 +107,8 @@ class Optimizer:
                 # vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
                 
                 apogee = max(alt_arr)
+                if apogee > best_apogee:
+                    best_apogee = apogee
             except Exception as e:
                 print(f"❌ Simulation Error: {e}")
                 return 99999.0
@@ -139,4 +142,4 @@ class Optimizer:
             random_state=42        
         )
 
-        return res
+        return (res, best_apogee)
