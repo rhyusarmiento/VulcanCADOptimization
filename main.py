@@ -30,7 +30,7 @@ try:
 
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=100)
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=50)
     
             # Report Results
             UiTools.report_results(results[0])

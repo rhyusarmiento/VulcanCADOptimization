@@ -37,9 +37,7 @@ class Optimizer:
             Real(0.03, 0.25, name='root_chord'),   # Root Chord m
             Real(0.01, 0.5, name='tip_chord'),      # Tip Chord m
             Real(0.01, 0.5, name='fin_sweep'),      # Sweep m
-            # Real(0.0, 1.3, name='fin_angle'),      # Angle rads
-            Real(-0.20, 0.0, name='fin_position'),   # Position m (Negative is forward)
-            # Real(0.0, 1.0, name='nose_mass'),      # Nose Mass kg
+            Real(0.0, 0.50, name='fin_bottom_offset'), # position of fin relative to bottom of tube m
             Real(0.0, 0.4, name='vary_mass'),      # Vary Mass kg
             Real(0.0, self.rocket.getLength(), name='vary_position')       # Position m
         ]
@@ -64,7 +62,7 @@ class Optimizer:
 
         @use_named_args(self.space)
         def objective_function(top_tube_length, fin_height, root_chord, tip_chord, 
-                               fin_sweep, fin_position, vary_mass, vary_position):
+                               fin_sweep, fin_bottom_offset, vary_mass, vary_position):
             # Mod Rocket
             try:
                 # --- TUBE ---
@@ -85,21 +83,17 @@ class Optimizer:
                         print(f"⚠️ Warning: Root chord not set correctly. Expected {root_chord}, got {fins.getRootChord()}")    
                     fins.setTipChord(tip_chord)
                     fins.setSweep(fin_sweep)
-                    # fins.setCantAngle(fin_angle) 
-                    # Set Position (Relative to BOTTOM)
+
+                    # --- APPLY DISTANCE FROM TOP ---
                     parent = fins.getParent()
                     if parent:
-                        tube_len = parent.getLength()
-                        pos_from_top = tube_len + fin_position - root_chord
-                        if pos_from_top < 0: pos_from_top = 0 
-                        fins.setAxialOffset(pos_from_top)
-                else:
-                    print("❌ ERROR: Could not find component Trapezoidal Fin Set")
+                        parent_len = parent.getLength()
 
-                # # --- NOSE BALLAST ---
-                # ballast = self.get_component("Nose Mass")
-                # if ballast: 
-                #     ballast.setMass(nose_mass)
+                        # Formula: Length - Root - Offset
+                        calculated_pos = parent_len - root_chord - fin_bottom_offset
+                        fins.setAxialOffset(calculated_pos)
+                    else:
+                        print("❌ ERROR: Could not find component Trapezoidal Fin Set")
 
                 # --- Vary Mass & Position ---
                 custom_vary_mass = self.get_component("Var Mass")
@@ -123,7 +117,7 @@ class Optimizer:
                 # Extract Flight Data
                 alt_arr = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
                 stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
-                vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
+                # vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
                 
                 apogee = max(alt_arr)
                 if apogee < 100:
@@ -134,34 +128,67 @@ class Optimizer:
             except Exception as e:
                 print(f"❌ Simulation Error: {e}")
 
-            # Calculate Loss (Distance from Target)
-            loss = abs(apogee - TARGET_ALTITUDE)
-
+            # Compute metrics
+            FlightEventType = jpype.JPackage("net").sf.openrocket.simulation.FlightEvent.Type
+            time_arr = np.array(data.get(self.FlightDataType.TYPE_TIME))
             sim_config = self.sim.getOptions()
             rail_length = sim_config.getLaunchRodLength()
+            events = data.getEvents()
+            burnout_time = 0.0
+            found_burnout = False
+
+            for event in events:
+                if event.getType() == FlightEventType.BURNOUT:
+                    burnout_time = event.getTime()
+                    found_burnout = True
+                    break
+            
+            if not found_burnout:
+                burnout_time = time_arr[-1]
+
+            end_index = np.searchsorted(time_arr, burnout_time)
             rail_indices = np.where(alt_arr >= rail_length)[0]
-
+            
             if len(rail_indices) > 0:
-                launch_stab = stab_arr[rail_indices[0]]
+                start_index = rail_indices[0]
             else:
-                launch_stab = -10.0
+                start_index = 0
 
-            # If OpenRocket failed to calculate stability, it returns NaN.
-            # We must treat this as a CRITICAL FAILURE.
-            if np.isnan(launch_stab):
-                print("⚠️ Stability is NaN (Math Error) - Penalizing!")
-                return 100000000.0 # Instant Death Penalty
+            if end_index > start_index:
+                boost_stability = stab_arr[start_index:end_index]
+            else:
+                boost_stability = [] # Flight was too short to measure
 
-            # Penalty: Unstable
-            if launch_stab < 1.8:
-                 loss += 50000 * (1.8 - launch_stab) ** 2
+            valid_stab = boost_stability[~np.isnan(boost_stability)]
+            if len(valid_stab) == 0:
+                print("💥 unstable crash (All NaN)")
+                return 100000000.0
+            else:
+                avg_stab = np.mean(valid_stab) # The "General Health"
+                min_stab = np.min(valid_stab)  # The "Worst Moment"
+
+            ## Compute Loss with Penalties
+            loss = abs(apogee - TARGET_ALTITUDE)
+            
+            # Safety Check: Did it ever dip below 1.5? (Dangerous!)
+            if min_stab < 1.5:
+                penalty = (1.5 - min_stab) * 100000
+                loss += penalty
+                print(f"⚠️ Dangerous Instability Detected (Min: {min_stab:.2f})")
+
+            # Optimization Check: Is the average too low? (Wobbly flight)
+            if avg_stab < 1.75:
+                loss += 2000 * (1.75 - avg_stab) ** 2
+
+            if avg_stab > 2:
+                loss += 5000 * (avg_stab - 2) ** 2
 
             # Constraint: Sweep length cannot be more than 2x the Root Chord
             if fin_sweep > (root_chord * 2.0):
                 penalty = (fin_sweep - (root_chord * 2.0)) * 5000
                 loss += penalty
 
-            # Penalty grows as the violation gets worse
+            # Constraint: Penalty grows as the violation gets worse
             if tip_chord > 2 * root_chord:
                 penalty = (tip_chord - 2 * root_chord) * 10000 
                 loss += penalty
@@ -193,11 +220,15 @@ class Optimizer:
         fin_sweep, fin_position, vary_mass, vary_position = best_params
 
         print(f"📝 Applying parameters:\n"
-              f"   - Tube Len: {top_tube_length:.3f} m\n"
-              f"   - Fin Root: {root_chord:.3f} m\n"
-              f"   - Fin Tip:  {tip_chord:.3f} m\n"
-              f"   - Sweep:    {fin_sweep:.3f} m")
-
+            f"   - Tube Len: {top_tube_length * 100:.2f} cm\n"
+            f"   - Fin Height: {fin_height * 100:.2f} cm\n"
+            f"   - Fin Root: {root_chord * 100:.2f} cm\n"
+            f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
+            f"   - Sweep:    {fin_sweep * 100:.2f} cm\n"
+            f"   - Fin Pos:  {fin_position * 100:.2f} cm\n"
+            f"   - Var Mass: {vary_mass * 1000:.0f} g\n"
+            f"   - Var Pos:  {vary_position * 100:.2f} cm\n")
+        
         # 2. APPLY TO ROCKET (Same logic as objective_function)
         # --- TUBE ---
         tube = self.get_component("Top Tube") # Verify this name!
@@ -232,39 +263,97 @@ class Optimizer:
         
         print("🏃 Running Final Simulation...")
         self.orh.run_simulation(self.sim)
-        data = self.sim.getSimulatedData().getBranch(0)
+        sim_data = self.sim.getSimulatedData()
+        data = sim_data.getBranch(0)
+        
+        # Get Events from the PARENT object (sim_data), not the branch
+        events = data.getEvents() 
+        FlightEventType = jpype.JPackage("net").sf.openrocket.simulation.FlightEvent.Type
+        
+        # Calculate Burnout
+        burnout_time = 0.0
+        found_burnout = False
+        for event in events:
+            if event.getType() == FlightEventType.BURNOUT:
+                burnout_time = event.getTime()
+                found_burnout = True
+                break
+        
+        if not found_burnout:
+             time_arr = np.array(data.get(self.FlightDataType.TYPE_TIME))
+             burnout_time = time_arr[-1]
 
-        # 4. EXTRACT FINAL STATS
-        alt = data.get(self.FlightDataType.TYPE_ALTITUDE)
-        vel = data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL)
-        stab = data.get(self.FlightDataType.TYPE_STABILITY)
+        # Calculate Stability Window
+        stab = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
+        time = np.array(data.get(self.FlightDataType.TYPE_TIME))
         
-        apogee = max(alt)
-        max_vel = max(vel)
-        max_mach = max_vel / 343.0
-        
-        # Calculate Stability off the Rail
+        # Rail Exit Index
         rail_len = self.sim.getOptions().getLaunchRodLength()
-        rail_indices = [i for i, h in enumerate(alt) if h >= rail_len]
+        alt = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
+        rail_indices = np.where(alt >= rail_len)[0]
+        start_idx = rail_indices[0] if len(rail_indices) > 0 else 0
         
-        if rail_indices:
-            rail_exit_stab = stab[rail_indices[0]]
-            rail_exit_vel = vel[rail_indices[0]]
+        # Burnout Index
+        end_idx = np.searchsorted(time, burnout_time)
+        
+        # Compute Stats
+        if end_idx > start_idx:
+            boost_stab = stab[start_idx:end_idx]
+            valid_stab = boost_stab[~np.isnan(boost_stab)]
+            if len(valid_stab) > 0:
+                avg_stab = np.mean(valid_stab)
+                min_stab = np.min(valid_stab)
+            else:
+                avg_stab = 0.0
+                min_stab = 0.0
         else:
-            rail_exit_stab = 0.0
-            rail_exit_vel = 0.0
+            avg_stab = 0.0
+            min_stab = 0.0
+
+        # Extract other stats
+        apogee = max(alt)
+        max_vel = max(np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL)))
+        max_mach = max_vel / 343.0
+        rail_exit_vel = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))[start_idx]
 
         # 5. PRINT REPORT
         print("-" * 30)
+        # print(stab)
         print(f"✅ FINAL RESULTS:")
         print(f"   🎯 Apogee:         {apogee:.2f} m  ({(apogee*3.28084):.0f} ft)")
-        print(f"   ⚖️ Launch Stab:    {rail_exit_stab:.2f} cal")
-        print(stab)
         print(f"   💨 Max Velocity:   {max_vel:.1f} m/s (Mach {max_mach:.2f})")
         print(f"   🚀 Rail Exit Vel:  {rail_exit_vel:.1f} m/s")
+        print(f"   🧠 Avg Stability:  {avg_stab:.2f} cal")
+        print(f"   🧠 Min Stability:  {min_stab:.2f} cal")
         print("-" * 30)
 
-        # 6. SAVE FILE
+        # 7. SAVE FILE (The Correct Way)
         print(f"💾 Saving optimized design to '{filename}'...")
-        self.doc.save(filename)
-        print("Done.")
+
+        try:
+            # 1. Setup Stream
+            fos = jpype.JPackage("java.io").FileOutputStream(filename)
+            
+            # 2. Setup Helper Objects (REQUIRED by the function signature)
+            # We need to create empty containers for warnings/errors/options
+            StorageOptions = jpype.JPackage("net.sf.openrocket.document").StorageOptions
+            options = StorageOptions() # Default options
+            
+            WarningSet = jpype.JPackage("net.sf.openrocket.logging").WarningSet
+            warnings = WarningSet()
+            
+            ErrorSet = jpype.JPackage("net.sf.openrocket.logging").ErrorSet
+            errors = ErrorSet()
+            
+            # 3. Get the Saver
+            Saver = jpype.JPackage("net.sf.openrocket.file.openrocket").OpenRocketSaver()
+            
+            # 4. SAVE (Pass all 5 arguments)
+            # Signature: save(OutputStream, Document, StorageOptions, WarningSet, ErrorSet)
+            Saver.save(fos, self.doc, options, warnings, errors)
+            
+            fos.close()
+            print("Done.")
+            
+        except Exception as e:
+            print(f"❌ Save Failed: {e}")

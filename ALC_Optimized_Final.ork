@@ -1,0 +1,436 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openrocket version="1.9" creator="OpenRocket 23.09">
+  <rocket>
+    <name>ALC Rocket 2026</name>
+    <id>e31570d7-b3ed-4b4d-8e91-d23a90d556ad</id>
+    <axialoffset method="absolute">0.0</axialoffset>
+    <position type="absolute">0.0</position>
+    <motorconfiguration configid="dd806261-6304-45e8-b923-4d1d3126bf6f" default="true">
+      <stage number="0" active="true"/>
+    </motorconfiguration>
+    <referencetype>maximum</referencetype>
+
+    <subcomponents>
+      <stage>
+        <name>Sustainer</name>
+        <id>eadaeb5d-e2ef-4715-b24d-d84828e40526</id>
+
+        <subcomponents>
+          <nosecone>
+            <name>Nose Cone</name>
+            <id>d44b7c91-a926-4158-a8a5-01db073f752a</id>
+            <finish>normal</finish>
+            <material type="bulk" density="946.0">Polypropylene, bulk</material>
+            <length>0.28575</length>
+            <thickness>0.0019557999999999997</thickness>
+            <shape>ogive</shape>
+            <shapeparameter>1.0</shapeparameter>
+            <aftradius>auto 0.0396748</aftradius>
+            <aftshoulderradius>0.037973</aftshoulderradius>
+            <aftshoulderlength>0.09525</aftshoulderlength>
+            <aftshoulderthickness>0.0</aftshoulderthickness>
+            <aftshouldercapped>false</aftshouldercapped>
+            <isflipped>false</isflipped>
+
+            <subcomponents>
+              <masscomponent>
+                <name>Var Mass</name>
+                <id>42d45dc0-5992-4ba0-9792-bf41eab523bf</id>
+                <axialoffset method="top">1.5023499999999999</axialoffset>
+                <position type="top">1.5023499999999999</position>
+                <overridemass>0.4</overridemass>
+                <overridesubcomponentsmass>false</overridesubcomponentsmass>
+                <packedlength>0.025</packedlength>
+                <packedradius>0.0125</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <mass>0.4</mass>
+                <masscomponenttype>masscomponent</masscomponenttype>
+              </masscomponent>
+            </subcomponents>
+          </nosecone>
+
+          <bodytube>
+            <name>Top Tube</name>
+            <id>97e55f23-821b-4ad4-9713-7ad158be1808</id>
+            <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
+            <finish>normal</finish>
+            <material type="bulk" density="1153.5">Vulcanized Fiber</material>
+            <length>0.48</length>
+            <thickness>0.0015748000000000081</thickness>
+            <radius>0.0396748</radius>
+
+            <subcomponents>
+              <tubecoupler>
+                <name>Tube Coupler</name>
+                <id>13c3c58a-38b5-4cd7-a167-b3468399eeb0</id>
+                <axialoffset method="bottom">0.1143</axialoffset>
+                <position type="bottom">0.1143</position>
+                <material type="bulk" density="1153.5">Vulcanized Fiber</material>
+                <length>0.2032</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>0.038061899999999996</outerradius>
+                <thickness>0.0015747999999999943</thickness>
+
+                <subcomponents>
+                  <masscomponent>
+                    <name>Avionics Bay</name>
+                    <id>c82a93d7-7de1-43b4-bf18-2bffce9ae712</id>
+                    <axialoffset method="top">0.0</axialoffset>
+                    <position type="top">0.0</position>
+                    <packedlength>0.20279999999999998</packedlength>
+                    <packedradius>0.0252</packedradius>
+                    <radialposition>0.0</radialposition>
+                    <radialdirection>0.0</radialdirection>
+                    <mass>0.6</mass>
+                    <masscomponenttype>flightcomputer</masscomponenttype>
+                  </masscomponent>
+
+                  <bulkhead>
+                    <name>Bulkhead</name>
+                    <id>fbeca255-9876-48d6-a0c8-79e395dbb679</id>
+                    <instancecount>1</instancecount>
+                    <instanceseparation>0.0</instanceseparation>
+                    <axialoffset method="bottom">0.0</axialoffset>
+                    <position type="bottom">0.0</position>
+                    <material type="bulk" density="630.0">Plywood (birch)</material>
+                    <length>0.010667999999999999</length>
+                    <radialposition>0.0</radialposition>
+                    <radialdirection>0.0</radialdirection>
+                    <outerradius>auto</outerradius>
+                  </bulkhead>
+
+                  <bulkhead>
+                    <name>Bulkhead</name>
+                    <id>7c636db4-b222-4084-a8f3-15cac28cb5d5</id>
+                    <instancecount>1</instancecount>
+                    <instanceseparation>0.0</instanceseparation>
+                    <axialoffset method="top">0.0</axialoffset>
+                    <position type="top">0.0</position>
+                    <material type="bulk" density="630.0">Plywood (birch)</material>
+                    <length>0.010667999999999999</length>
+                    <radialposition>0.0</radialposition>
+                    <radialdirection>0.0</radialdirection>
+                    <outerradius>auto</outerradius>
+                  </bulkhead>
+                </subcomponents>
+              </tubecoupler>
+
+              <shockcord>
+                <name>Drogue Shock Cord</name>
+                <id>a25bdcf0-0055-478c-8703-c04546a98bc9</id>
+                <axialoffset method="top">0.10159999999999995</axialoffset>
+                <position type="top">0.10159999999999995</position>
+                <packedlength>0.27899999999999997</packedlength>
+                <packedradius>0.0252</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cordlength>3.6576000000000004</cordlength>
+                <material type="line" density="0.00967306">Kevlar 12-strand (3.2 mm, 1/8 in)</material>
+              </shockcord>
+
+              <parachute>
+                <name>Drogue</name>
+                <id>70e2270c-b190-4ffa-b245-8cda593218c6</id>
+                <preset type="PARACHUTE" manufacturer="LOC/Precision" partno="LP-24-2022" digest="385bfad027ef98b1a30d3bc7a5d6bb51"/>
+                <axialoffset method="top">0.25399999999999984</axialoffset>
+                <position type="top">0.25399999999999984</position>
+                <packedlength>0.1266</packedlength>
+                <packedradius>0.037899999999999996</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cd>auto</cd>
+                <material type="surface" density="0.0589">Nylon fabric, ripstop, 1.9 oz actual</material>
+                <deployevent>ejection</deployevent>
+                <deployaltitude>200.0</deployaltitude>
+                <deploydelay>0.0</deploydelay>
+                <deploymentconfiguration configid="dd806261-6304-45e8-b923-4d1d3126bf6f">
+                  <deployevent>apogee</deployevent>
+                  <deployaltitude>200.0</deployaltitude>
+                  <deploydelay>2.0</deploydelay>
+                </deploymentconfiguration>
+                <diameter>0.6095999999999999</diameter>
+                <linecount>8</linecount>
+                <linelength>0.6095999999999999</linelength>
+                <linematerial type="line" density="0.0016">Nylon Paracord, 110 lb, 1/16 in. dia.</linematerial>
+              </parachute>
+
+              <masscomponent>
+                <name>Camera</name>
+                <id>3931f082-7f12-4338-8bec-e41c939d64f0</id>
+                <axialoffset method="top">0.10159999999999986</axialoffset>
+                <position type="top">0.10159999999999986</position>
+                <packedlength>0.1266</packedlength>
+                <packedradius>0.037899999999999996</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <mass>0.566990462</mass>
+                <masscomponenttype>payload</masscomponenttype>
+              </masscomponent>
+            </subcomponents>
+          </bodytube>
+
+          <bodytube>
+            <name>Joint Tube</name>
+            <id>4337be4b-0909-4b48-bd32-430838a9551c</id>
+            <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
+            <finish>normal</finish>
+            <material type="bulk" density="1153.5">Vulcanized Fiber</material>
+            <length>0.0254</length>
+            <thickness>0.0015748000000000081</thickness>
+            <radius>0.0396748</radius>
+          </bodytube>
+
+          <bodytube>
+            <name>Bottom Tube</name>
+            <id>b094dc12-b5f1-4001-b4b1-f70be6b85d85</id>
+            <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
+            <finish>normal</finish>
+            <material type="bulk" density="1153.5">Vulcanized Fiber</material>
+            <length>0.7111999999999998</length>
+            <thickness>0.0015748000000000081</thickness>
+            <radius>0.0396748</radius>
+
+            <subcomponents>
+              <innertube>
+                <name>Inner Tube</name>
+                <id>7a81e656-2be6-463e-97b4-d452d334d6e2</id>
+                <axialoffset method="bottom">0.0</axialoffset>
+                <position type="bottom">0.0</position>
+                <material type="bulk" density="855.2">Paper, kraft glassine, LOC tube avg</material>
+                <length>0.35559999999999997</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>0.0206375</outerradius>
+                <thickness>0.0013335000000000014</thickness>
+                <clusterconfiguration>single</clusterconfiguration>
+                <clusterscale>1.0</clusterscale>
+                <clusterrotation>0.0</clusterrotation>
+                <motormount>
+                  <ignitionevent>automatic</ignitionevent>
+                  <ignitiondelay>0.0</ignitiondelay>
+                  <overhang>0.0</overhang>
+                  <motor configid="dd806261-6304-45e8-b923-4d1d3126bf6f">
+                    <type>single</type>
+                    <manufacturer>AeroTech</manufacturer>
+                    <digest>e8de3c3c4472b283827725a828b29dab</digest>
+                    <designation>HP-J425R</designation>
+                    <diameter>0.038</diameter>
+                    <length>0.356</length>
+                    <delay>14.0</delay>
+                  </motor>
+                  <ignitionconfiguration configid="dd806261-6304-45e8-b923-4d1d3126bf6f">
+                    <ignitionevent>automatic</ignitionevent>
+                    <ignitiondelay>0.0</ignitiondelay>
+                  </ignitionconfiguration>
+                </motormount>
+              </innertube>
+
+              <centeringring>
+                <name>Centering Ring 1</name>
+                <id>f015fdec-28d0-42c7-b38d-1cb985298eb2</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0</instanceseparation>
+                <axialoffset method="bottom">-0.038099999999999995</axialoffset>
+                <position type="bottom">-0.038099999999999995</position>
+                <material type="bulk" density="630.0">Plywood (birch)</material>
+                <length>0.0127</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>0.038099999999999995</outerradius>
+                <innerradius>auto</innerradius>
+              </centeringring>
+
+              <centeringring>
+                <name>Centering Ring 2</name>
+                <id>c715bf3a-5d46-4d95-b61f-177c972cec30</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0</instanceseparation>
+                <axialoffset method="bottom">-0.15239999999999995</axialoffset>
+                <position type="bottom">-0.15239999999999995</position>
+                <material type="bulk" density="630.0">Plywood (birch)</material>
+                <length>0.0127</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>auto</outerradius>
+                <innerradius>auto</innerradius>
+              </centeringring>
+
+              <centeringring>
+                <name>Centering Ring 3</name>
+                <id>9653a3d3-7677-4143-bcb3-11efe230d87c</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0</instanceseparation>
+                <axialoffset method="bottom">-0.25399999999999984</axialoffset>
+                <position type="bottom">-0.25399999999999984</position>
+                <material type="bulk" density="630.0">Plywood (birch)</material>
+                <length>0.0127</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>auto</outerradius>
+                <innerradius>auto</innerradius>
+              </centeringring>
+
+              <centeringring>
+                <name>Centering Ring 4</name>
+                <id>5f72bd13-1654-4266-a86f-5dbf04936eff</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0</instanceseparation>
+                <axialoffset method="bottom">-0.3301999999999999</axialoffset>
+                <position type="bottom">-0.3301999999999999</position>
+                <material type="bulk" density="630.0">Plywood (birch)</material>
+                <length>0.0127</length>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <outerradius>auto</outerradius>
+                <innerradius>auto</innerradius>
+              </centeringring>
+
+              <trapezoidfinset>
+                <name>Trapezoidal Fin Set</name>
+                <id>4b3245b6-cb95-42ea-8bc0-3d80d6da4c32</id>
+                <instancecount>4</instancecount>
+                <fincount>4</fincount>
+                <radiusoffset method="surface">0.0</radiusoffset>
+                <angleoffset method="relative">0.0</angleoffset>
+                <rotation>0.0</rotation>
+                <axialoffset method="bottom">0.2749027701936264</axialoffset>
+                <position type="bottom">0.2749027701936264</position>
+                <finish>normal</finish>
+                <material type="bulk" density="1780.0">Carbon fiber</material>
+                <thickness>0.003175</thickness>
+                <crosssection>square</crosssection>
+                <cant>0.0</cant>
+                <tabheight>0.0127</tabheight>
+                <tablength>0.1008</tablength>
+                <tabposition relativeto="center">0.0</tabposition>
+                <tabposition relativeto="middle">0.0</tabposition>
+                <filletradius>0.0</filletradius>
+                <filletmaterial type="bulk" density="170.0">Balsa</filletmaterial>
+                <rootchord>0.23629722980637347</rootchord>
+                <tipchord>0.5</tipchord>
+                <sweeplength>0.01</sweeplength>
+                <height>0.06719572609927132</height>
+              </trapezoidfinset>
+
+              <masscomponent>
+                <name>Motor Mount</name>
+                <id>d22fa2a9-e50f-4b50-9539-61330a4549eb</id>
+                <axialoffset method="bottom">0.0254</axialoffset>
+                <position type="bottom">0.0254</position>
+                <packedlength>0.0508</packedlength>
+                <packedradius>0.0252</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <mass>0.025004279374199998</mass>
+                <masscomponenttype>masscomponent</masscomponenttype>
+              </masscomponent>
+
+              <shockcord>
+                <name>Parachute Shock Cord</name>
+                <id>d2c3cd9e-69c0-4580-9695-60845021ef8a</id>
+                <axialoffset method="top">0.1016</axialoffset>
+                <position type="top">0.1016</position>
+                <packedlength>0.2536</packedlength>
+                <packedradius>0.037899999999999996</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cordlength>4.572</cordlength>
+                <material type="line" density="0.00967306">Kevlar 12-strand (3.2 mm, 1/8 in)</material>
+              </shockcord>
+
+              <parachute>
+                <name>Parachute</name>
+                <id>aaf25c0c-e5c0-44f9-9275-449f62830638</id>
+                <preset type="PARACHUTE" manufacturer="LOC/Precision" partno="LP-50-2022" digest="4257f268ab5bf69894d1b1523bf46c63"/>
+                <axialoffset method="top">0.10159999999999997</axialoffset>
+                <position type="top">0.10159999999999997</position>
+                <packedlength>0.2282</packedlength>
+                <packedradius>0.0252</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cd>auto</cd>
+                <material type="surface" density="0.0589">Nylon fabric, ripstop, 1.9 oz actual</material>
+                <deployevent>ejection</deployevent>
+                <deployaltitude>200.0</deployaltitude>
+                <deploydelay>0.0</deploydelay>
+                <deploymentconfiguration configid="dd806261-6304-45e8-b923-4d1d3126bf6f">
+                  <deployevent>altitude</deployevent>
+                  <deployaltitude>304.8</deployaltitude>
+                  <deploydelay>0.0</deploydelay>
+                </deploymentconfiguration>
+                <diameter>1.27</diameter>
+                <linecount>10</linecount>
+                <linelength>1.27</linelength>
+                <linematerial type="line" density="0.0035">Nylon Paracord, 275 lb, 2.38 mm dia.</linematerial>
+              </parachute>
+
+              <railbutton>
+                <name>Rail Button</name>
+                <id>212a26ee-0701-48e0-9292-7802c9ce55fa</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0582</instanceseparation>
+                <angleoffset method="relative">180.0</angleoffset>
+                <axialoffset method="middle">0.15239999999999995</axialoffset>
+                <position type="middle">0.15239999999999995</position>
+                <finish>normal</finish>
+                <material type="bulk" density="1250.0">PLA - 100% infill</material>
+                <outerdiameter>0.0097</outerdiameter>
+                <innerdiameter>0.008</innerdiameter>
+                <height>0.0097</height>
+                <baseheight>0.002</baseheight>
+                <flangeheight>0.002</flangeheight>
+                <screwheight>0.0</screwheight>
+              </railbutton>
+
+              <railbutton>
+                <name>Rail Button</name>
+                <id>7769f760-1af2-4c18-9aee-ea4278fa3ced</id>
+                <instancecount>1</instancecount>
+                <instanceseparation>0.0582</instanceseparation>
+                <angleoffset method="relative">180.0</angleoffset>
+                <axialoffset method="middle">-0.2793999999999999</axialoffset>
+                <position type="middle">-0.2793999999999999</position>
+                <finish>normal</finish>
+                <material type="bulk" density="1250.0">PLA - 100% infill</material>
+                <outerdiameter>0.0097</outerdiameter>
+                <innerdiameter>0.008</innerdiameter>
+                <height>0.0097</height>
+                <baseheight>0.002</baseheight>
+                <flangeheight>0.002</flangeheight>
+                <screwheight>0.0</screwheight>
+              </railbutton>
+            </subcomponents>
+          </bodytube>
+        </subcomponents>
+      </stage>
+    </subcomponents>
+  </rocket>
+
+  <simulations>
+    <simulation status="notsimulated">
+      <name>Simulation 1</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>dd806261-6304-45e8-b923-4d1d3126bf6f</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>1615.44</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+      <flightdata maxaltitude="924.746" maxvelocity="156.109" maxacceleration="106.727" maxmach="0.468" timetoapogee="13.542" flighttime="89.909" groundhitvelocity="7.347" launchrodvelocity="13.452" deploymentvelocity="17.243" optimumdelay="11.944">
+      </flightdata>
+    </simulation>
+  </simulations>
+  <photostudio>
+  </photostudio>
+</openrocket>

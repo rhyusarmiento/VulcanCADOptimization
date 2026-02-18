@@ -56,12 +56,36 @@ def report_results(results):
     print("✅ Done! Check your project folder for the .png files.")
 
 
-    def print_rocket_tree(rocket):
-        print("\n🌳 ROCKET COMPONENT TREE (Copy these names!):")
-        for component in rocket.getChildren():
-            print(f"   📂 {component.getName()}")
-            for child in component.getChildren():
-                print(f"      🔹 {child.getName()}")
-                for subchild in child.getChildren():
-                    print(f"         🔸 {subchild.getName()}")
-        print("-" * 40 + "\n")
+def print_rocket_tree(rocket):
+    print("\n🌳 ROCKET COMPONENT TREE (Copy these names!):")
+    for component in rocket.getChildren():
+        print(f"   📂 {component.getName()}")
+        for child in component.getChildren():
+            print(f"      🔹 {child.getName()}")
+            for subchild in child.getChildren():
+                print(f"         🔸 {subchild.getName()}")
+    print("-" * 40 + "\n")
+
+            #     # --- FINS ---
+            #     fins = Opt.get_component("Trapezoidal Fin Set")
+            #     print(f"🔍 METHODS FOR: {fins.getName()}")
+
+            #     # Get all attributes/methods
+            #     all_attributes = dir(fins)
+
+            #     # # 1. Filter for "Getters" (Reading values)
+            #     # getters = [m for m in all_attributes if m.startswith('get')]
+            #     # print(f"\n--- GETTERS ({len(getters)}) ---")
+            #     # for g in sorted(getters):
+            #     #     print(f"  . {g}()")
+
+            #     # 2. Filter for "Setters" (Changing values - CRITICAL for optimization)
+            #     # setters = [m for m in all_attributes if m.startswith('set')]
+            #     # print(f"\n--- SETTERS ({len(setters)}) ---")
+            #     # for s in sorted(setters):
+            #     #     print(f"  . {s}(val)")
+
+            #     # 3. specific keywords you might be missing (like 'is', 'update', 'calc')
+            #     others = [m for m in all_attributes if not m.startswith('get') and not m.startswith('set') and not m.startswith('_')]
+            #     print(f"\n--- OTHER METHODS ---")
+            #     print(others)
