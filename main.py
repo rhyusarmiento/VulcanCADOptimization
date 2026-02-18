@@ -24,12 +24,23 @@ try:
             print("Please save a rocket design in this folder to test.")
         else:
             print(f"Loaded rocket")
+            # orh = orhelper.Helper(instance)
+            # doc = orh.load_doc(str(ROCKET_FILE))
+            # sim = doc.getSimulation(0)
+
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=250)
-            print(f"✅ Optimization Complete! Best Apogee: {results[1]} m")
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=100)
+    
             # Report Results
             UiTools.report_results(results[0])
+            
+            # RUN FINAL VERIFICATION & SAVE
+            # results[0].x contains the list of best parameters found
+            best_parameters = results[0].x
+            
+            # Call the new function we just wrote
+            Opt.verify_and_save(best_parameters, "ALC_Optimized_Final.ork")
 
 except Exception as e:
     print(f"❌ Error: {e}")

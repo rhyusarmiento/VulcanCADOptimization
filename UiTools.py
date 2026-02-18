@@ -15,18 +15,18 @@ def report_results(results):
     # Geometry (Tube & Fins)
     print("🚀 GEOMETRY")
     print(f"   Tube Length:      {results.x[0]*100:.2f} cm")
-    print(f"   Fin Span:         {results.x[1]*100:.2f} cm")
+    print(f"   Fin Height:         {results.x[1]*100:.2f} cm")
     print(f"   Root Chord:       {results.x[2]*100:.2f} cm")
     print(f"   Tip Chord:        {results.x[3]*100:.2f} cm")
     print(f"   Fin Sweep:        {results.x[4]*100:.2f} cm")
-    print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
-    print(f"   Fin Position:     {results.x[6]*100:.2f} cm (Relative)")
+    # print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
+    print(f"   Fin Position:     {results.x[5]*100:.2f} cm (Relative)")
 
     # Mass & Balance
     print("\n⚖️ MASS & BALANCE")
     # print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
-    print(f"   Var Mass:     {results.x[7]*1000:.0f} g")
-    print(f"   Var Position: {results.x[8]*100:.2f} cm")
+    print(f"   Var Mass:     {results.x[6]*1000:.0f} g")
+    print(f"   Var Position: {results.x[7]*100:.2f} cm")
     
     print("-" * 50)
     print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")
@@ -54,3 +54,14 @@ def report_results(results):
     plt.close()
     
     print("✅ Done! Check your project folder for the .png files.")
+
+
+    def print_rocket_tree(rocket):
+        print("\n🌳 ROCKET COMPONENT TREE (Copy these names!):")
+        for component in rocket.getChildren():
+            print(f"   📂 {component.getName()}")
+            for child in component.getChildren():
+                print(f"      🔹 {child.getName()}")
+                for subchild in child.getChildren():
+                    print(f"         🔸 {subchild.getName()}")
+        print("-" * 40 + "\n")
