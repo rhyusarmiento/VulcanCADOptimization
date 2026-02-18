@@ -30,10 +30,10 @@ try:
 
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=50)
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=100)
     
             # Report Results
-            UiTools.report_results(results[0])
+            # UiTools.report_results(results[0])
             
             # RUN FINAL VERIFICATION & SAVE
             # results[0].x contains the list of best parameters found

@@ -217,15 +217,23 @@ class Optimizer:
         # ⚠️ CRITICAL: This must match the order in self.space EXACTLY
         # If you switched to Ratios, update these variable names!
         top_tube_length, fin_height, root_chord, tip_chord, \
-        fin_sweep, fin_position, vary_mass, vary_position = best_params
+        fin_sweep, fin_bottom_offset, vary_mass, vary_position = best_params
 
+        fins = self.get_component("Trapezoidal Fin Set") 
+        parent = fins.getParent()
+        calculated_pos_display = None
+        if parent:
+            parent_len = parent.getLength()
+            # Formula: Length - Root - Offset
+            calculated_pos_display = parent_len - root_chord - fin_bottom_offset
+        
         print(f"📝 Applying parameters:\n"
             f"   - Tube Len: {top_tube_length * 100:.2f} cm\n"
             f"   - Fin Height: {fin_height * 100:.2f} cm\n"
             f"   - Fin Root: {root_chord * 100:.2f} cm\n"
             f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
             f"   - Sweep:    {fin_sweep * 100:.2f} cm\n"
-            f"   - Fin Pos:  {fin_position * 100:.2f} cm\n"
+            f"   - Fin Pos from top:  {calculated_pos_display * 100:.2f} cm\n"
             f"   - Var Mass: {vary_mass * 1000:.0f} g\n"
             f"   - Var Pos:  {vary_position * 100:.2f} cm\n")
         
@@ -235,20 +243,20 @@ class Optimizer:
         if tube: tube.setLength(top_tube_length)
 
         # --- FINS ---
-        fins = self.get_component("Trapezoidal Fin Set") # Verify this name!
+        fins = self.get_component("Trapezoidal Fin Set") 
         if fins:
             fins.setHeight(fin_height)
             fins.setRootChord(root_chord)
             fins.setTipChord(tip_chord)
             fins.setSweep(fin_sweep)
             
-            # Position Logic
+            # --- APPLY DISTANCE FROM TOP ---
             parent = fins.getParent()
             if parent:
-                tube_len = parent.getLength()
-                pos_from_top = tube_len + fin_position - root_chord
-                if pos_from_top < 0: pos_from_top = 0
-                fins.setAxialOffset(pos_from_top)
+                parent_len = parent.getLength()
+                # Formula: Length - Root - Offset
+                calculated_pos = parent_len - root_chord - fin_bottom_offset
+                fins.setAxialOffset(calculated_pos)
 
         # --- MASS ---
         mass_comp = self.get_component("Var Mass") # Verify this name!
