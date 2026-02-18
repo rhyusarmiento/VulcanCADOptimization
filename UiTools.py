@@ -7,29 +7,29 @@ import matplotlib.pyplot as plt
 from skopt.plots import plot_convergence, plot_objective
 
 def report_results(results):
-    # --- 1. PRINT TEXT REPORT ---
-    print("\n" + "="*50)
-    print("✅ OPTIMAL DESIGN FOUND")
-    print("="*50)
+    # # --- 1. PRINT TEXT REPORT ---
+    # print("\n" + "="*50)
+    # print("✅ OPTIMAL DESIGN FOUND")
+    # print("="*50)
     
-    # Geometry (Tube & Fins)
-    print("🚀 GEOMETRY")
-    print(f"   Tube Length:      {results.x[0]*100:.2f} cm")
-    print(f"   Fin Height:         {results.x[1]*100:.2f} cm")
-    print(f"   Root Chord:       {results.x[2]*100:.2f} cm")
-    print(f"   Tip Chord:        {results.x[3]*100:.2f} cm")
-    print(f"   Fin Sweep:        {results.x[4]*100:.2f} cm")
-    # print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
-    print(f"   Fin Position:     {results.x[5]*100:.2f} cm (Relative)")
+    # # Geometry (Tube & Fins)
+    # print("🚀 GEOMETRY")
+    # print(f"   Tube Length:      {results.x[0]*100:.2f} cm")
+    # print(f"   Fin Height:         {results.x[1]*100:.2f} cm")
+    # print(f"   Root Chord:       {results.x[2]*100:.2f} cm")
+    # print(f"   Tip Chord:        {results.x[3]*100:.2f} cm")
+    # print(f"   Fin Sweep:        {results.x[4]*100:.2f} cm")
+    # # print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
+    # print(f"   Fin Position:     {results.x[5]*100:.2f} cm (Relative)")
 
-    # Mass & Balance
-    print("\n⚖️ MASS & BALANCE")
-    # print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
-    print(f"   Var Mass:     {results.x[6]*1000:.0f} g")
-    print(f"   Var Position: {results.x[7]*100:.2f} cm")
+    # # Mass & Balance
+    # print("\n⚖️ MASS & BALANCE")
+    # # print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
+    # print(f"   Var Mass:     {results.x[6]*1000:.0f} g")
+    # print(f"   Var Position: {results.x[7]*100:.2f} cm")
     
-    print("-" * 50)
-    print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")
+    # print("-" * 50)
+    # print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")
 
     # --- 2. SAVE PLOTS TO DISK ---
     print("\n📊 Saving Visualization Files...")

@@ -36,15 +36,15 @@
               <masscomponent>
                 <name>Var Mass</name>
                 <id>42d45dc0-5992-4ba0-9792-bf41eab523bf</id>
-                <axialoffset method="top">0.8134898435313773</axialoffset>
-                <position type="top">0.8134898435313773</position>
-                <overridemass>0.23828963367364123</overridemass>
+                <axialoffset method="top">1.5023499999999999</axialoffset>
+                <position type="top">1.5023499999999999</position>
+                <overridemass>0.0</overridemass>
                 <overridesubcomponentsmass>false</overridesubcomponentsmass>
                 <packedlength>0.025</packedlength>
                 <packedradius>0.0125</packedradius>
                 <radialposition>0.0</radialposition>
                 <radialdirection>0.0</radialdirection>
-                <mass>0.23828963367364123</mass>
+                <mass>0.0</mass>
                 <masscomponenttype>masscomponent</masscomponenttype>
               </masscomponent>
             </subcomponents>
@@ -56,7 +56,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.48</length>
+            <length>0.8149367832521593</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
 
@@ -295,8 +295,8 @@
                 <radiusoffset method="surface">0.0</radiusoffset>
                 <angleoffset method="relative">0.0</angleoffset>
                 <rotation>0.0</rotation>
-                <axialoffset method="top">0.3040405255736146</axialoffset>
-                <position type="top">0.3040405255736146</position>
+                <axialoffset method="top">0.5721610282204336</axialoffset>
+                <position type="top">0.5721610282204336</position>
                 <finish>normal</finish>
                 <material type="bulk" density="1780.0">Carbon fiber</material>
                 <thickness>0.003175</thickness>
@@ -308,10 +308,10 @@
                 <tabposition relativeto="middle">0.0</tabposition>
                 <filletradius>0.0</filletradius>
                 <filletmaterial type="bulk" density="170.0">Balsa</filletmaterial>
-                <rootchord>0.12056478415388487</rootchord>
-                <tipchord>0.09240911556643337</tipchord>
-                <sweeplength>0.06305631364143936</sweeplength>
-                <height>0.2245249150172647</height>
+                <rootchord>0.03</rootchord>
+                <tipchord>0.01</tipchord>
+                <sweeplength>0.5</sweeplength>
+                <height>0.16963035349460934</height>
               </trapezoidfinset>
 
               <masscomponent>
@@ -427,7 +427,7 @@
         <atmosphere model="isa"/>
         <timestep>0.05</timestep>
       </conditions>
-      <flightdata maxaltitude="818.051" maxvelocity="160.046" maxacceleration="109.928" maxmach="0.48" timetoapogee="12.419" flighttime="84.462" groundhitvelocity="7.158" launchrodvelocity="14.017" deploymentvelocity="16.802" optimumdelay="10.771">
+      <flightdata maxaltitude="1214.47" maxvelocity="195.266" maxacceleration="133.537" maxmach="0.586" timetoapogee="15.056" flighttime="118.508" groundhitvelocity="6.555" launchrodvelocity="15.208" deploymentvelocity="15.379" optimumdelay="13.408">
       </flightdata>
     </simulation>
   </simulations>

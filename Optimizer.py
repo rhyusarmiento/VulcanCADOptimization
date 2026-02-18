@@ -117,7 +117,7 @@ class Optimizer:
                 # Extract Flight Data
                 alt_arr = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
                 stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
-                # vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
+                vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
                 
                 apogee = max(alt_arr)
                 if apogee < 100:
@@ -159,6 +159,7 @@ class Optimizer:
             else:
                 boost_stability = [] # Flight was too short to measure
 
+            rail_exit_vel = vel_arr[start_index] if start_index < len(vel_arr) else 0.0
             valid_stab = boost_stability[~np.isnan(boost_stability)]
             if len(valid_stab) == 0:
                 print("💥 unstable crash (All NaN)")
@@ -167,31 +168,40 @@ class Optimizer:
                 avg_stab = np.mean(valid_stab) # The "General Health"
                 min_stab = np.min(valid_stab)  # The "Worst Moment"
 
-            ## Compute Loss with Penalties
-            loss = abs(apogee - TARGET_ALTITUDE)
-            
-            # Safety Check: Did it ever dip below 1.5? (Dangerous!)
+            # 1. PRIMARY OBJECTIVE: APOGEE BOWL
+            # We use a lower power (2 instead of 4) so the gradients are smoother
+            # but scale it so it's the dominant factor near the target.
+            loss = (1000 * abs(apogee - TARGET_ALTITUDE) / 55.0) ** 4
+
+            # 2. THE "FORBIDDEN ZONE": MINIMUM STABILITY
+            # If the rocket is unsafe, the penalty must be a "Wall" that the
+            # optimizer cannot climb over. 1.5 is the safety floor.
             if min_stab < 1.5:
-                penalty = (1.5 - min_stab) * 100000
-                loss += penalty
-                print(f"⚠️ Dangerous Instability Detected (Min: {min_stab:.2f})")
+                loss += (1.5 - min_stab) * 50000000
+                print(f"⚠️ Dangerous Instability (Min: {min_stab:.2f})")
 
-            # Optimization Check: Is the average too low? (Wobbly flight)
-            if avg_stab < 1.75:
-                loss += 2000 * (1.75 - avg_stab) ** 2
-
-            if avg_stab > 2:
-                loss += 5000 * (avg_stab - 2) ** 2
-
-            # Constraint: Sweep length cannot be more than 2x the Root Chord
-            if fin_sweep > (root_chord * 2.0):
-                penalty = (fin_sweep - (root_chord * 2.0)) * 5000
-                loss += penalty
-
-            # Constraint: Penalty grows as the violation gets worse
+            # 3. RULE OF THUMB: OVER-STABILITY (WEATHERCOCKING)
+            # Rockets with > 2.5 stability are too wind-sensitive. 
+            # We want to gently push the optimizer back toward the 1.5 - 2.2 range.
+            if avg_stab > 3.5:
+                loss += (1000 * (avg_stab - 3.5)) ** 3
+                
+            # 4. GEOMETRIC CONSTRAINTS (Structural Integrity)
+            # Rule: Sweep should not exceed Root Chord (Standard Rocketry Guideline)
+            # Extreme sweeps cause fin flutter and structural failure.
+            if fin_sweep > 2 * root_chord:
+                loss += 8000 * (fin_sweep - root_chord)
+                
+            # Rule: Tip Chord should generally be smaller than Root Chord
+            # Large tips create high drag and stress on the fin root.
             if tip_chord > 2 * root_chord:
-                penalty = (tip_chord - 2 * root_chord) * 10000 
-                loss += penalty
+                loss += 8000 * (tip_chord - root_chord)
+
+            # 5. VELOCITY CONSTRAINT: RAIL EXIT
+            # If the rocket leaves the rail too slow, it can't stabilize.
+            # Assuming rail_exit_vel was computed earlier in the code:
+            if rail_exit_vel < 13.0:  # 15 m/s is a common safe minimum
+                loss += 10000 * (13.0 - rail_exit_vel)
 
             return loss
 
@@ -233,7 +243,7 @@ class Optimizer:
             f"   - Fin Root: {root_chord * 100:.2f} cm\n"
             f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
             f"   - Sweep:    {fin_sweep * 100:.2f} cm\n"
-            f"   - Fin Pos from top:  {calculated_pos_display * 100:.2f} cm\n"
+            f"   - Fin Pos from top:  {calculated_pos_display * 100:.2f} cm (Offset: {fin_bottom_offset * 100:.2f} cm)\n"
             f"   - Var Mass: {vary_mass * 1000:.0f} g\n"
             f"   - Var Pos:  {vary_position * 100:.2f} cm\n")
         
