@@ -26,7 +26,7 @@ try:
             print(f"Loaded rocket")
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=10)
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=500)
             print(f"✅ Optimization Complete! Best Apogee: {results[1]} m")
             # Report Results
             UiTools.report_results(results[0])
