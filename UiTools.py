@@ -24,9 +24,9 @@ def report_results(results):
 
     # Mass & Balance
     print("\n⚖️ MASS & BALANCE")
-    print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
-    print(f"   Var Mass:     {results.x[8]*1000:.0f} g")
-    print(f"   Var Position: {results.x[9]*100:.2f} cm")
+    # print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
+    print(f"   Var Mass:     {results.x[7]*1000:.0f} g")
+    print(f"   Var Position: {results.x[8]*100:.2f} cm")
     
     print("-" * 50)
     print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")

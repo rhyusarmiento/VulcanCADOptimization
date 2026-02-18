@@ -1,0 +1,22 @@
+
+🚀 Starting Optimization Run (500 Iterations)...
+✅ Optimization Complete! Best Apogee: 1460.7654883617342 m
+
+==================================================
+✅ OPTIMAL DESIGN FOUND
+==================================================
+🚀 GEOMETRY
+   Tube Length:      40.00 cm
+   Fin Span:         2.70 cm
+   Root Chord:       2.36 cm
+   Tip Chord:        0.00 cm
+   Fin Sweep:        15.36 cm
+   Fin Cant Angle:   65.90° (1.150 rad)
+   Fin Position:     -0.77 cm (Relative)
+
+⚖️ MASS & BALANCE
+   Nose Ballast:     607 g
+   Var Mass:     956 g
+   Var Position: 28.21 cm
+--------------------------------------------------
+🎯 Predicted Error:  63.2345 (Objective Score)

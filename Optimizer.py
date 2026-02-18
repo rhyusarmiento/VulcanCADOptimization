@@ -32,16 +32,16 @@ class Optimizer:
         self.setup_components(self.rocket)
         # Search Space
         self.space = [
-            Real(0.4, 2.5, name='top_tube_length'),    # Tube m
-            Real(0.005, 0.25, name='fin_height'),     # Span m
+            Real(0.48, 2.5, name='top_tube_length'),    # Tube m
+            Real(0.005, 0.25, name='fin_height'),     # Height m
             Real(0.005, 0.25, name='root_chord'),   # Root Chord m
-            Real(0.0, 1.0, name='tip_chord'),      # Tip Chord m
-            Real(0.0, 1.0, name='fin_sweep'),      # Sweep m
-            Real(0.0, 1.35, name='fin_angle'),      # Angle rads
+            Real(0.005, 1.0, name='tip_chord'),      # Tip Chord m
+            Real(0.005, 1.0, name='fin_sweep'),      # Sweep m
+            Real(0.0, 1.3, name='fin_angle'),      # Angle rads
             Real(-0.20, 0.0, name='fin_position'),   # Position m (Negative is forward)
-            Real(0.0, 1.0, name='nose_mass'),      # Nose Mass kg
+            # Real(0.0, 1.0, name='nose_mass'),      # Nose Mass kg
             Real(0.0, 1.0, name='vary_mass'),      # Vary Mass kg
-            Real(0.0, self.rocket.getLength() - 0.026, name='vary_position')       # Position m
+            Real(0.0, self.rocket.getLength(), name='vary_position')       # Position m
         ]
 
     def setup_components(self, component):
@@ -64,7 +64,7 @@ class Optimizer:
 
         @use_named_args(self.space)
         def objective_function(top_tube_length, fin_height, root_chord, tip_chord, 
-                               fin_sweep, fin_angle, fin_position, nose_mass, vary_mass, vary_position):
+                               fin_sweep, fin_angle, fin_position, vary_mass, vary_position):
             # Mod Rocket
             try:
                 # --- TUBE ---
@@ -88,10 +88,10 @@ class Optimizer:
                         if pos_from_top < 0: pos_from_top = 0 
                         fins.setAxialOffset(pos_from_top)
 
-                # --- NOSE BALLAST ---
-                ballast = self.get_component("Nose Mass")
-                if ballast: 
-                    ballast.setMass(nose_mass)
+                # # --- NOSE BALLAST ---
+                # ballast = self.get_component("Nose Mass")
+                # if ballast: 
+                #     ballast.setMass(nose_mass)
 
                 # --- Vary Mass & Position ---
                 custom_vary_mass= self.get_component("Vary Mass")
@@ -110,8 +110,8 @@ class Optimizer:
                 
                 # Extract Flight Data
                 alt_arr = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
-                # stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
-                # vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
+                stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
+                vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
                 
                 apogee = max(alt_arr)
                 nonlocal best_apogee
@@ -124,20 +124,17 @@ class Optimizer:
             # 3. Calculate Loss (Distance from Target)
             loss = abs(apogee - TARGET_ALTITUDE)
 
-            # --- OPTIONAL PENALTIES (Uncomment if needed) ---
-            # # Get Rail Exit Data (approx 2.44m / 8ft)
-            # rail_indices = np.where(alt_arr >= 2.44)[0]
-            # if len(rail_indices) > 0:
-            #     launch_stab = stab_arr[rail_indices[0]]
-            #     launch_vel = vel_arr[rail_indices[0]]
-            # else:
-            #     launch_stab = 0.0; launch_vel = 0.0
+            sim_config = self.sim.getOptions()
+            rail_length = sim_config.getLaunchRodLength() # Returns length in meters
+            rail_indices = np.where(alt_arr >= rail_length)[0]
 
-            # # Penalty: Unstable (< 1.5 cal)
-            # if launch_stab < 1.5:
-            #     loss += 5000 * (1.5 - launch_stab) ** 2
+            if len(rail_indices) > 0:
+                launch_stab = stab_arr[rail_indices[0]]
 
-            # print(f"   Alt: {apogee*3.28:.0f}ft | Loss: {loss:.2f}")
+            # Penalty: Unstable (< 1.5 cal)
+            if launch_stab < 1.9:
+                loss += 5000 * (1.9 - launch_stab) ** 2
+
             return loss
 
         # Run the optimizer
@@ -145,8 +142,8 @@ class Optimizer:
             objective_function,
             self.space,
             n_calls=iterations,            
-            n_random_starts=10,    
-            noise=10.0,            
+            n_random_starts=int(iterations * 0.75),
+            noise=1e-6,            
             random_state=42        
         )
 

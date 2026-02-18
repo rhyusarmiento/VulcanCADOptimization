@@ -9,7 +9,7 @@ import traceback
 
 # 1. Path to your verified JAR
 JAR_PATH = Path(__file__).parent / 'OpenRocket-23.09.jar'
-ROCKET_FILE = Path(__file__).parent / 'ALC Rocket Rough Draft.ork'
+ROCKET_FILE = Path(__file__).parent / 'ALC Rocket PDR Checked.ork'
 TARGET_ALTITUDE = 1524.0 # 5000 ft
 print("Initializing OpenRocket...")
 
@@ -26,7 +26,7 @@ try:
             print(f"Loaded rocket")
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=500)
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=250)
             print(f"✅ Optimization Complete! Best Apogee: {results[1]} m")
             # Report Results
             UiTools.report_results(results[0])
