@@ -10,7 +10,7 @@ import traceback
 # 1. Path to your verified JAR
 JAR_PATH = Path(__file__).parent / 'OpenRocket-23.09.jar'
 ROCKET_FILE = Path(__file__).parent / 'ALC Rocket PDR Checked.ork'
-TARGET_ALTITUDE = 1400.0 # 4500~ ft
+TARGET_ALTITUDE = 1350.0 # 4250~ ft
 print("Initializing OpenRocket...")
 
 try:
@@ -30,7 +30,7 @@ try:
 
             # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=50)
+            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=30)
     
             # Report Results
             UiTools.report_results(results[0])

@@ -31,8 +31,12 @@ class Optimizer:
         self.components = []
         self.setup_components(self.rocket)
         # Search Space
+        halfcluster = 35.5 / 100.0 # cm to m
+        nosefit = 13.5 / 100.0 # cm to m
+        moterfit = 35.5 / 100.0 # cm to m
         self.space = [
-            Real(0.48, 1, name='top_tube_length'),    # Tube m
+            Real(halfcluster + nosefit, 1, name='top_tube_length'),    # Total Tube m
+            Real(halfcluster + moterfit, 1.25, name='bottom_tube_length'),     # Bottom Tube m
             Real(0.03, 0.25, name='fin_height'),     # Height m
             Real(0.03, 0.25, name='root_chord'),   # Root Chord m
             Real(0.01, 0.5, name='tip_chord'),      # Tip Chord m
@@ -61,18 +65,23 @@ class Optimizer:
         best_apogee = 0.0
 
         @use_named_args(self.space)
-        def objective_function(top_tube_length, fin_height, root_chord, tip_chord, 
+        def objective_function(top_tube_length, bottom_tube_length, fin_height, root_chord, tip_chord, 
                                fin_sweep, fin_bottom_offset, vary_mass, vary_position):
             # Mod Rocket
             try:
                 # --- TUBE ---
-                tube = self.get_component("Top Tube")
-                if tube: 
-                    tube.setLength(top_tube_length)
-                    if tube.getLength() != top_tube_length:
-                        print(f"⚠️ Warning: Tube length not set correctly. Expected {top_tube_length}, got {tube.getLength()}") 
+                top_tube = self.get_component("Top Tube")
+                bottom_tube = self.get_component("Bottom Tube")
+                if top_tube: 
+                    top_tube.setLength(top_tube_length)
+                    if top_tube.getLength() != top_tube_length:
+                        print(f"⚠️ Warning: Top Tube length not set correctly. Expected {top_tube_length}, got {top_tube.getLength()}") 
+                if bottom_tube:
+                    bottom_tube.setLength(bottom_tube_length)
+                    if bottom_tube.getLength() != bottom_tube_length:
+                        print(f"⚠️ Warning: Bottom Tube length not set correctly. Expected {bottom_tube_length}, got {bottom_tube.getLength()}")
                 else:
-                    print(f"❌ ERROR: Could not find component top tube")
+                    print(f"❌ ERROR: Could not find component bottom tube")
 
                 # --- FINS ---
                 fins = self.get_component("Trapezoidal Fin Set")
@@ -88,7 +97,8 @@ class Optimizer:
                     parent = fins.getParent()
                     if parent:
                         parent_len = parent.getLength()
-
+                        if parent_len != bottom_tube_length:
+                            print(f"⚠️ Warning: Parent length mismatch. Expected {bottom_tube_length}, got {parent_len}")
                         # Formula: Length - Root - Offset
                         calculated_pos = parent_len - root_chord - fin_bottom_offset
                         fins.setAxialOffset(calculated_pos)
@@ -171,37 +181,36 @@ class Optimizer:
             # 1. PRIMARY OBJECTIVE: APOGEE BOWL
             # We use a lower power (2 instead of 4) so the gradients are smoother
             # but scale it so it's the dominant factor near the target.
-            loss = (1000 * abs(apogee - TARGET_ALTITUDE) / 55.0) ** 4
-
+            loss = ((abs(apogee - TARGET_ALTITUDE) / 20.0) ** 2) * 100000
+ 
             # 2. THE "FORBIDDEN ZONE": MINIMUM STABILITY
             # If the rocket is unsafe, the penalty must be a "Wall" that the
             # optimizer cannot climb over. 1.5 is the safety floor.
             if min_stab < 1.5:
-                loss += (1.5 - min_stab) * 50000000
-                print(f"⚠️ Dangerous Instability (Min: {min_stab:.2f})")
+                loss += ((1.5 - min_stab) + 10000000) ** 2
+                # print(f"⚠️ Dangerous Instability (Min: {min_stab:.2f})")
 
             # 3. RULE OF THUMB: OVER-STABILITY (WEATHERCOCKING)
             # Rockets with > 2.5 stability are too wind-sensitive. 
-            # We want to gently push the optimizer back toward the 1.5 - 2.2 range.
-            if avg_stab > 3.5:
-                loss += (1000 * (avg_stab - 3.5)) ** 3
+            if avg_stab > 2.1:
+                loss += ((avg_stab - 2.1) ** 2) * 10000
                 
             # 4. GEOMETRIC CONSTRAINTS (Structural Integrity)
             # Rule: Sweep should not exceed Root Chord (Standard Rocketry Guideline)
             # Extreme sweeps cause fin flutter and structural failure.
             if fin_sweep > 2 * root_chord:
-                loss += 8000 * (fin_sweep - root_chord)
+                loss += ((fin_sweep - root_chord) ** 2)* 100
                 
             # Rule: Tip Chord should generally be smaller than Root Chord
             # Large tips create high drag and stress on the fin root.
             if tip_chord > 2 * root_chord:
-                loss += 8000 * (tip_chord - root_chord)
+                loss += ((tip_chord - root_chord) ** 2) * 100
 
             # 5. VELOCITY CONSTRAINT: RAIL EXIT
             # If the rocket leaves the rail too slow, it can't stabilize.
             # Assuming rail_exit_vel was computed earlier in the code:
             if rail_exit_vel < 13.0:  # 15 m/s is a common safe minimum
-                loss += 10000 * (13.0 - rail_exit_vel)
+                loss += ((13.0 - rail_exit_vel) + 1000000) ** 2
 
             return loss
 
@@ -210,7 +219,7 @@ class Optimizer:
             objective_function,
             self.space,
             n_calls=iterations,            
-            n_random_starts=int(iterations * 0.5),
+            n_random_starts=int(iterations * 0.4),
             noise=1e-6,            
             random_state=42        
         )
@@ -226,7 +235,7 @@ class Optimizer:
         # 1. UNPACK PARAMETERS
         # ⚠️ CRITICAL: This must match the order in self.space EXACTLY
         # If you switched to Ratios, update these variable names!
-        top_tube_length, fin_height, root_chord, tip_chord, \
+        top_tube_length, bottom_tube_length, fin_height, root_chord, tip_chord, \
         fin_sweep, fin_bottom_offset, vary_mass, vary_position = best_params
 
         fins = self.get_component("Trapezoidal Fin Set") 
@@ -238,7 +247,8 @@ class Optimizer:
             calculated_pos_display = parent_len - root_chord - fin_bottom_offset
         
         print(f"📝 Applying parameters:\n"
-            f"   - Tube Len: {top_tube_length * 100:.2f} cm\n"
+            f"   - Top Tube Len: {top_tube_length * 100:.2f} cm\n"
+            f"   - Bottom Tube Len:  {bottom_tube_length * 100:.2f} cm\n"
             f"   - Fin Height: {fin_height * 100:.2f} cm\n"
             f"   - Fin Root: {root_chord * 100:.2f} cm\n"
             f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
@@ -249,8 +259,12 @@ class Optimizer:
         
         # 2. APPLY TO ROCKET (Same logic as objective_function)
         # --- TUBE ---
-        tube = self.get_component("Top Tube") # Verify this name!
-        if tube: tube.setLength(top_tube_length)
+        top_tube = self.get_component("Top Tube")
+        bottom_tube = self.get_component("Bottom Tube")
+        if top_tube: 
+            top_tube.setLength(top_tube_length)
+        if bottom_tube:
+            bottom_tube.setLength(bottom_tube_length)
 
         # --- FINS ---
         fins = self.get_component("Trapezoidal Fin Set") 

@@ -36,15 +36,15 @@
               <masscomponent>
                 <name>Var Mass</name>
                 <id>42d45dc0-5992-4ba0-9792-bf41eab523bf</id>
-                <axialoffset method="top">1.5023499999999999</axialoffset>
-                <position type="top">1.5023499999999999</position>
-                <overridemass>0.0</overridemass>
+                <axialoffset method="top">0.27531316962581515</axialoffset>
+                <position type="top">0.27531316962581515</position>
+                <overridemass>0.15642424302929636</overridemass>
                 <overridesubcomponentsmass>false</overridesubcomponentsmass>
                 <packedlength>0.025</packedlength>
                 <packedradius>0.0125</packedradius>
                 <radialposition>0.0</radialposition>
                 <radialdirection>0.0</radialdirection>
-                <mass>0.0</mass>
+                <mass>0.15642424302929636</mass>
                 <masscomponenttype>masscomponent</masscomponenttype>
               </masscomponent>
             </subcomponents>
@@ -56,7 +56,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.8149367832521593</length>
+            <length>0.4981427886323092</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
 
@@ -120,8 +120,8 @@
               <shockcord>
                 <name>Drogue Shock Cord</name>
                 <id>a25bdcf0-0055-478c-8703-c04546a98bc9</id>
-                <axialoffset method="top">0.10159999999999995</axialoffset>
-                <position type="top">0.10159999999999995</position>
+                <axialoffset method="bottom">-0.09940000000000006</axialoffset>
+                <position type="bottom">-0.09940000000000006</position>
                 <packedlength>0.27899999999999997</packedlength>
                 <packedradius>0.0252</packedradius>
                 <radialposition>0.0</radialposition>
@@ -134,8 +134,8 @@
                 <name>Drogue</name>
                 <id>70e2270c-b190-4ffa-b245-8cda593218c6</id>
                 <preset type="PARACHUTE" manufacturer="LOC/Precision" partno="LP-24-2022" digest="385bfad027ef98b1a30d3bc7a5d6bb51"/>
-                <axialoffset method="top">0.25399999999999984</axialoffset>
-                <position type="top">0.25399999999999984</position>
+                <axialoffset method="bottom">-0.09940000000000015</axialoffset>
+                <position type="bottom">-0.09940000000000015</position>
                 <packedlength>0.1266</packedlength>
                 <packedradius>0.037899999999999996</packedradius>
                 <radialposition>0.0</radialposition>
@@ -159,8 +159,8 @@
               <masscomponent>
                 <name>Camera</name>
                 <id>3931f082-7f12-4338-8bec-e41c939d64f0</id>
-                <axialoffset method="top">0.10159999999999986</axialoffset>
-                <position type="top">0.10159999999999986</position>
+                <axialoffset method="bottom">-0.25180000000000013</axialoffset>
+                <position type="bottom">-0.25180000000000013</position>
                 <packedlength>0.1266</packedlength>
                 <packedradius>0.037899999999999996</packedradius>
                 <radialposition>0.0</radialposition>
@@ -177,7 +177,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.0254</length>
+            <length>0.025</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
           </bodytube>
@@ -188,7 +188,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.7111999999999998</length>
+            <length>0.8346826658359605</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
 
@@ -295,8 +295,8 @@
                 <radiusoffset method="surface">0.0</radiusoffset>
                 <angleoffset method="relative">0.0</angleoffset>
                 <rotation>0.0</rotation>
-                <axialoffset method="top">0.5721610282204336</axialoffset>
-                <position type="top">0.5721610282204336</position>
+                <axialoffset method="top">0.5676823649404736</axialoffset>
+                <position type="top">0.5676823649404736</position>
                 <finish>normal</finish>
                 <material type="bulk" density="1780.0">Carbon fiber</material>
                 <thickness>0.003175</thickness>
@@ -308,10 +308,10 @@
                 <tabposition relativeto="middle">0.0</tabposition>
                 <filletradius>0.0</filletradius>
                 <filletmaterial type="bulk" density="170.0">Balsa</filletmaterial>
-                <rootchord>0.03</rootchord>
-                <tipchord>0.01</tipchord>
-                <sweeplength>0.5</sweeplength>
-                <height>0.16963035349460934</height>
+                <rootchord>0.18031797414160083</rootchord>
+                <tipchord>0.30889836231348433</tipchord>
+                <sweeplength>0.41826550675072066</sweeplength>
+                <height>0.08302560252572258</height>
               </trapezoidfinset>
 
               <masscomponent>
@@ -372,8 +372,8 @@
                 <instancecount>1</instancecount>
                 <instanceseparation>0.0582</instanceseparation>
                 <angleoffset method="relative">180.0</angleoffset>
-                <axialoffset method="middle">0.15239999999999995</axialoffset>
-                <position type="middle">0.15239999999999995</position>
+                <axialoffset method="bottom">-0.20319999999999994</axialoffset>
+                <position type="bottom">-0.20319999999999994</position>
                 <finish>normal</finish>
                 <material type="bulk" density="1250.0">PLA - 100% infill</material>
                 <outerdiameter>0.0097</outerdiameter>
@@ -390,8 +390,8 @@
                 <instancecount>1</instancecount>
                 <instanceseparation>0.0582</instanceseparation>
                 <angleoffset method="relative">180.0</angleoffset>
-                <axialoffset method="middle">-0.2793999999999999</axialoffset>
-                <position type="middle">-0.2793999999999999</position>
+                <axialoffset method="bottom">-0.6349999999999998</axialoffset>
+                <position type="bottom">-0.6349999999999998</position>
                 <finish>normal</finish>
                 <material type="bulk" density="1250.0">PLA - 100% infill</material>
                 <outerdiameter>0.0097</outerdiameter>
@@ -427,7 +427,7 @@
         <atmosphere model="isa"/>
         <timestep>0.05</timestep>
       </conditions>
-      <flightdata maxaltitude="1214.47" maxvelocity="195.266" maxacceleration="133.537" maxmach="0.586" timetoapogee="15.056" flighttime="118.508" groundhitvelocity="6.555" launchrodvelocity="15.208" deploymentvelocity="15.379" optimumdelay="13.408">
+      <flightdata maxaltitude="1070.6" maxvelocity="170.316" maxacceleration="116.283" maxmach="0.511" timetoapogee="14.481" flighttime="102.346" groundhitvelocity="7.05" launchrodvelocity="14.346" deploymentvelocity="16.552" optimumdelay="12.883">
       </flightdata>
     </simulation>
   </simulations>

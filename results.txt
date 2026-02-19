@@ -31,3 +31,49 @@
    Var Mass:     184 g
    Var Position: 50.13 cm
 --------------------------------------------------
+
+========================================
+🔍 VERIFYING BEST SOLUTION
+========================================
+📝 Applying parameters:
+   - Tube Len: 48.00 cm
+   - Fin Height: 18.64 cm
+   - Fin Root: 3.00 cm
+   - Fin Tip:  1.00 cm
+   - Sweep:    44.92 cm
+   - Fin Pos from top:  46.19 cm (Offset: 21.93 cm)
+   - Var Mass: 0 g
+   - Var Pos:  150.23 cm
+
+🏃 Running Final Simulation...
+------------------------------
+✅ FINAL RESULTS:
+   🎯 Apogee:         1270.00 m  (4167 ft)
+   💨 Max Velocity:   204.4 m/s (Mach 0.60)
+   🚀 Rail Exit Vel:  15.8 m/s
+   🧠 Avg Stability:  1.98 cal
+   🧠 Min Stability:  0.65 cal
+------------------------------
+
+========================================
+🔍 VERIFYING BEST SOLUTION
+========================================
+📝 Applying parameters:
+   - Tube Len: 52.14 cm
+   - Fin Height: 11.46 cm
+   - Fin Root: 15.50 cm
+   - Fin Tip:  4.55 cm
+   - Sweep:    42.15 cm
+   - Fin Pos from top:  37.23 cm (Offset: 18.38 cm)
+   - Var Mass: 0 g
+   - Var Pos:  47.03 cm
+
+🏃 Running Final Simulation...
+------------------------------
+✅ FINAL RESULTS:
+   🎯 Apogee:         1220.41 m  (4004 ft)
+   💨 Max Velocity:   192.6 m/s (Mach 0.56)
+   🚀 Rail Exit Vel:  15.0 m/s
+   🧠 Avg Stability:  2.98 cal
+   🧠 Min Stability:  1.67 cal
+------------------------------
