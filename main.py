@@ -2,6 +2,7 @@ import orhelper
 from pathlib import Path
 import sys
 import jpype
+from pyparsing import Opt
 from sklearn.discriminant_analysis import Real
 from Optimizer import Optimizer
 import UiTools
@@ -15,7 +16,6 @@ print("Initializing OpenRocket...")
 
 try:
     with orhelper.OpenRocketInstance(str(JAR_PATH)) as instance:
-        orh = orhelper.Helper(instance)
         print("✅ SUCCESS: OpenRocket backend is connected and ready!")
 
         # Load the rocket
@@ -27,20 +27,18 @@ try:
             # orh = orhelper.Helper(instance)
             # doc = orh.load_doc(str(ROCKET_FILE))
             # sim = doc.getSimulation(0)
-
-            # Run the Optimizer
             Opt = Optimizer(instance, str(ROCKET_FILE))
-            results = Opt.run_optimizer(TARGET_ALTITUDE, iterations=30)
-    
-            # Report Results
-            UiTools.report_results(results[0])
-            
-            # RUN FINAL VERIFICATION & SAVE
-            # results[0].x contains the list of best parameters found
-            best_parameters = results[0].x
-            
-            # Call the new function we just wrote
-            Opt.verify_and_save(best_parameters, "ALC_Optimized_Final.ork")
+
+            # 1. Parachute Drop (Find the safe zone)
+            best_stage1_params, s1_apogee = Opt.run_stage1_global(TARGET_ALTITUDE, iterations=60)
+
+            # 2. Mountain Hike (Get to the absolute peak)
+            # We pass the exact parameters from Stage 1 into Stage 2
+            final_optimized_params = Opt.run_stage2_local(best_stage1_params.x, TARGET_ALTITUDE, max_iter=40)
+
+            # 3. Verify and Save
+            UiTools.report_stats(best_stage1_params)
+            Opt.verify_and_save(final_optimized_params, "ALC_Optimized_Final.ork")
 
 except Exception as e:
     print(f"❌ Error: {e}")

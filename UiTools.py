@@ -6,55 +6,57 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from skopt.plots import plot_convergence, plot_objective
 
-def report_results(results):
-    # # --- 1. PRINT TEXT REPORT ---
-    # print("\n" + "="*50)
-    # print("✅ OPTIMAL DESIGN FOUND")
-    # print("="*50)
+def report_stats(stage1_res):
+    # --- 1. PRINT TEXT REPORT ---
+    print("\n" + "="*50)
+    print("✅ OPTIMAL DESIGN FOUND (Stage 1 Final)")
+    print("="*50)
     
-    # # Geometry (Tube & Fins)
-    # print("🚀 GEOMETRY")
-    # print(f"   Tube Length:      {results.x[0]*100:.2f} cm")
-    # print(f"   Fin Height:         {results.x[1]*100:.2f} cm")
-    # print(f"   Root Chord:       {results.x[2]*100:.2f} cm")
-    # print(f"   Tip Chord:        {results.x[3]*100:.2f} cm")
-    # print(f"   Fin Sweep:        {results.x[4]*100:.2f} cm")
-    # # print(f"   Fin Cant Angle:   {math.degrees(results.x[5]):.2f}° ({results.x[5]:.3f} rad)")
-    # print(f"   Fin Position:     {results.x[5]*100:.2f} cm (Relative)")
+    final_params = stage1_res.x
 
-    # # Mass & Balance
-    # print("\n⚖️ MASS & BALANCE")
-    # # print(f"   Nose Ballast:     {results.x[7]*1000:.0f} g")
-    # print(f"   Var Mass:     {results.x[6]*1000:.0f} g")
-    # print(f"   Var Position: {results.x[7]*100:.2f} cm")
+    # Geometry (Tube & Fins)
+    print("🚀 GEOMETRY")
+    print(f"   Top Tube Length:    {final_params[0]*100:.2f} cm")
+    print(f"   Bottom Tube Length: {final_params[1]*100:.2f} cm")
+    print(f"   Fin Height:         {final_params[2]*100:.2f} cm")
+    print(f"   Root Chord:         {final_params[3]*100:.2f} cm")
+    print(f"   Tip Chord:          {final_params[4]*100:.2f} cm")
+    print(f"   Fin Sweep:          {final_params[5]*100:.2f} cm")
+    print(f"   Fin Bottom Offset:  {final_params[6]*100:.2f} cm")
+
+    # Mass & Balance
+    print("\n⚖️ MASS & BALANCE")
+    print(f"   Var Mass:           {final_params[7]*1000:.0f} g")
+    print(f"   Var Position:       {final_params[8]*100:.2f} cm")
     
-    # print("-" * 50)
-    # print(f"🎯 Predicted Error:  {results.fun:.4f} (Objective Score)")
+    print("-" * 50)
+    print(f"🎯 Final Predicted Loss: {stage1_res.fun:.4f}")
 
     # --- 2. SAVE PLOTS TO DISK ---
-    print("\n📊 Saving Visualization Files...")
+    # We use the Stage 1 result for plotting because it contains the 
+    # Gaussian surrogate map of the entire search space.
+    
+    print("\n📊 Saving Visualization Files (From Stage 1 Global Search)...")
     
     # Plot 1: Convergence
     print("   -> Saving 'opt_convergence.png'...")
     plt.figure(figsize=(10, 6))
-    plot_convergence(results)
-    plt.title("Optimization Convergence")
-    plt.savefig("opt_convergence.png", dpi=100) # Save file
-    plt.close() # Close memory buffer
-
+    plot_convergence(stage1_res)
+    plt.title("Stage 1: Bayesian Optimization Convergence")
+    plt.savefig("opt_convergence.png", dpi=100, bbox_inches='tight') 
+    plt.close() 
     # Plot 2: The Landscape
     print("   -> Saving 'opt_landscape.png' (This may take a moment)...")
-    plt.figure(figsize=(20, 20)) # Massive size for 10x10 matrix
+    plt.figure(figsize=(20, 20)) 
     
-    # Plotting all 10 variables is very dense. 
-    # Use 'dimensions' to pick specific names if you defined them in 'results.space'
-    plot_objective(results, n_points=20) 
+    # skopt plots the landscape based on the random exploration and gaussian process
+    plot_objective(stage1_res, n_points=20) 
     
-    plt.savefig("opt_landscape.png", dpi=100)
+    plt.savefig("opt_landscape.png", dpi=100, bbox_inches='tight')
     plt.close()
     
     print("✅ Done! Check your project folder for the .png files.")
-
+    
 
 def print_rocket_tree(rocket):
     print("\n🌳 ROCKET COMPONENT TREE (Copy these names!):")

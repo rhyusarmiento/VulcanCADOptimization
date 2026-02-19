@@ -36,15 +36,15 @@
               <masscomponent>
                 <name>Var Mass</name>
                 <id>42d45dc0-5992-4ba0-9792-bf41eab523bf</id>
-                <axialoffset method="top">0.27531316962581515</axialoffset>
-                <position type="top">0.27531316962581515</position>
-                <overridemass>0.15642424302929636</overridemass>
+                <axialoffset method="top">1.5107499999999998</axialoffset>
+                <position type="top">1.5107499999999998</position>
+                <overridemass>0.1003970919785524</overridemass>
                 <overridesubcomponentsmass>false</overridesubcomponentsmass>
                 <packedlength>0.025</packedlength>
                 <packedradius>0.0125</packedradius>
                 <radialposition>0.0</radialposition>
                 <radialdirection>0.0</radialdirection>
-                <mass>0.15642424302929636</mass>
+                <mass>0.1003970919785524</mass>
                 <masscomponenttype>masscomponent</masscomponenttype>
               </masscomponent>
             </subcomponents>
@@ -56,7 +56,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.4981427886323092</length>
+            <length>0.49</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
 
@@ -188,7 +188,7 @@
             <preset type="BODY_TUBE" manufacturer="Always Ready Rocketry" partno="BT_3.00_48" digest="802c49fca10dd8d0c87fa003b4a7d3f9"/>
             <finish>normal</finish>
             <material type="bulk" density="1153.5">Vulcanized Fiber</material>
-            <length>0.8346826658359605</length>
+            <length>1.25</length>
             <thickness>0.0015748000000000081</thickness>
             <radius>0.0396748</radius>
 
@@ -295,8 +295,8 @@
                 <radiusoffset method="surface">0.0</radiusoffset>
                 <angleoffset method="relative">0.0</angleoffset>
                 <rotation>0.0</rotation>
-                <axialoffset method="top">0.5676823649404736</axialoffset>
-                <position type="top">0.5676823649404736</position>
+                <axialoffset method="top">1.22</axialoffset>
+                <position type="top">1.22</position>
                 <finish>normal</finish>
                 <material type="bulk" density="1780.0">Carbon fiber</material>
                 <thickness>0.003175</thickness>
@@ -308,10 +308,10 @@
                 <tabposition relativeto="middle">0.0</tabposition>
                 <filletradius>0.0</filletradius>
                 <filletmaterial type="bulk" density="170.0">Balsa</filletmaterial>
-                <rootchord>0.18031797414160083</rootchord>
-                <tipchord>0.30889836231348433</tipchord>
-                <sweeplength>0.41826550675072066</sweeplength>
-                <height>0.08302560252572258</height>
+                <rootchord>0.03</rootchord>
+                <tipchord>0.01</tipchord>
+                <sweeplength>0.5</sweeplength>
+                <height>0.20557904145829567</height>
               </trapezoidfinset>
 
               <masscomponent>
@@ -427,7 +427,7 @@
         <atmosphere model="isa"/>
         <timestep>0.05</timestep>
       </conditions>
-      <flightdata maxaltitude="1070.6" maxvelocity="170.316" maxacceleration="116.283" maxmach="0.511" timetoapogee="14.481" flighttime="102.346" groundhitvelocity="7.05" launchrodvelocity="14.346" deploymentvelocity="16.552" optimumdelay="12.883">
+      <flightdata maxaltitude="1098.198" maxvelocity="181.851" maxacceleration="124.358" maxmach="0.546" timetoapogee="14.426" flighttime="107.274" groundhitvelocity="6.792" launchrodvelocity="14.442" deploymentvelocity="15.936" optimumdelay="12.778">
       </flightdata>
     </simulation>
   </simulations>

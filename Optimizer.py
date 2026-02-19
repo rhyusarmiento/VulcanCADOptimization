@@ -4,6 +4,7 @@ import numpy as np
 from skopt import gp_minimize
 from skopt.space import Real
 from skopt.utils import use_named_args
+from scipy.optimize import minimize
 
 # TODO:
 # - Add more design variables (Nose Cone Shape, Fin Count, Material Density)
@@ -59,205 +60,199 @@ class Optimizer:
                 return comp
         return None
 
-    # --- RUN OPTIMIZATION ---
-    def run_optimizer(self, TARGET_ALTITUDE, iterations=50):
-        print(f"🚀 Starting Optimization Run ({iterations} Iterations)...")
-        best_apogee = 0.0
+    # --- 1. THE SHARED PHYSICS ENGINE ---
+    def calculate_loss(self, x, TARGET_ALTITUDE):
+        # Initialize apogee tracker safely
+        if not hasattr(self, 'best_apogee'):
+            self.best_apogee = 0.0
 
-        @use_named_args(self.space)
-        def objective_function(top_tube_length, bottom_tube_length, fin_height, root_chord, tip_chord, 
-                               fin_sweep, fin_bottom_offset, vary_mass, vary_position):
-            # Mod Rocket
-            try:
-                # --- TUBE ---
-                top_tube = self.get_component("Top Tube")
-                bottom_tube = self.get_component("Bottom Tube")
-                if top_tube: 
-                    top_tube.setLength(top_tube_length)
-                    if top_tube.getLength() != top_tube_length:
-                        print(f"⚠️ Warning: Top Tube length not set correctly. Expected {top_tube_length}, got {top_tube.getLength()}") 
-                if bottom_tube:
-                    bottom_tube.setLength(bottom_tube_length)
-                    if bottom_tube.getLength() != bottom_tube_length:
-                        print(f"⚠️ Warning: Bottom Tube length not set correctly. Expected {bottom_tube_length}, got {bottom_tube.getLength()}")
-                else:
-                    print(f"❌ ERROR: Could not find component bottom tube")
+        # Unpack the list 'x' into your variables
+        top_tube_length, bottom_tube_length, fin_height, root_chord, tip_chord, \
+        fin_sweep, fin_bottom_offset, vary_mass, vary_position = x
 
-                # --- FINS ---
-                fins = self.get_component("Trapezoidal Fin Set")
-                if fins:
-                    fins.setHeight(fin_height)
-                    fins.setRootChord(root_chord)
-                    if fins.getRootChord() != root_chord:
-                        print(f"⚠️ Warning: Root chord not set correctly. Expected {root_chord}, got {fins.getRootChord()}")    
-                    fins.setTipChord(tip_chord)
-                    fins.setSweep(fin_sweep)
+        try:
+            # --- TUBE ---
+            top_tube = self.get_component("Top Tube")
+            bottom_tube = self.get_component("Bottom Tube")
+            if top_tube: 
+                top_tube.setLength(top_tube_length)
+            if bottom_tube:
+                bottom_tube.setLength(bottom_tube_length)
 
-                    # --- APPLY DISTANCE FROM TOP ---
-                    parent = fins.getParent()
-                    if parent:
-                        parent_len = parent.getLength()
-                        if parent_len != bottom_tube_length:
-                            print(f"⚠️ Warning: Parent length mismatch. Expected {bottom_tube_length}, got {parent_len}")
-                        # Formula: Length - Root - Offset
-                        calculated_pos = parent_len - root_chord - fin_bottom_offset
-                        fins.setAxialOffset(calculated_pos)
-                    else:
-                        print("❌ ERROR: Could not find component Trapezoidal Fin Set")
+            # --- FINS ---
+            fins = self.get_component("Trapezoidal Fin Set")
+            if fins:
+                fins.setHeight(fin_height)
+                fins.setRootChord(root_chord)
+                fins.setTipChord(tip_chord)
+                fins.setSweep(fin_sweep)
 
-                # --- Vary Mass & Position ---
-                custom_vary_mass = self.get_component("Var Mass")
-                if custom_vary_mass:
-                    custom_vary_mass.setMassOverridden(True)
-                    custom_vary_mass.setOverrideMass(vary_mass)
-                    custom_vary_mass.setAxialOffset(vary_position)
-                else:
-                    print("❌ ERROR: Could not find component Vary Mass")
+                # --- APPLY DISTANCE FROM TOP ---
+                parent = fins.getParent()
+                if parent:
+                    parent_len = parent.getLength()
+                    calculated_pos = parent_len - root_chord - fin_bottom_offset
+                    fins.setAxialOffset(calculated_pos)
 
-            except Exception as e:
-                print(f"❌ Design Error: {e}")
-                return 99999.0 # Massive penalty for crashing
+            # --- Vary Mass & Position ---
+            custom_vary_mass = self.get_component("Var Mass")
+            if custom_vary_mass:
+                custom_vary_mass.setMassOverridden(True)
+                custom_vary_mass.setOverrideMass(vary_mass)
+                custom_vary_mass.setAxialOffset(vary_position)
 
-            # Run Simulation
-            try:
-                self.sim = self.doc.getSimulation(0) # Reset sim to clear old data
-                self.orh.run_simulation(self.sim)
-                data = self.sim.getSimulatedData().getBranch(0)
-                
-                # Extract Flight Data
-                alt_arr = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
-                stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
-                vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
-                
-                apogee = max(alt_arr)
-                if apogee < 100:
-                    return 100000000
-                nonlocal best_apogee
-                if apogee > best_apogee:
-                    best_apogee = apogee
-            except Exception as e:
-                print(f"❌ Simulation Error: {e}")
+        except Exception as e:
+            print(f"❌ Design Error: {e}")
+            return 99999.0 # Massive penalty for crashing
 
-            # Compute metrics
-            FlightEventType = jpype.JPackage("net").sf.openrocket.simulation.FlightEvent.Type
-            time_arr = np.array(data.get(self.FlightDataType.TYPE_TIME))
-            sim_config = self.sim.getOptions()
-            rail_length = sim_config.getLaunchRodLength()
-            events = data.getEvents()
-            burnout_time = 0.0
-            found_burnout = False
-
-            for event in events:
-                if event.getType() == FlightEventType.BURNOUT:
-                    burnout_time = event.getTime()
-                    found_burnout = True
-                    break
+        # Run Simulation
+        try:
+            self.sim = self.doc.getSimulation(0) # Reset sim to clear old data
+            self.orh.run_simulation(self.sim)
+            data = self.sim.getSimulatedData().getBranch(0)
             
-            if not found_burnout:
-                burnout_time = time_arr[-1]
-
-            end_index = np.searchsorted(time_arr, burnout_time)
-            rail_indices = np.where(alt_arr >= rail_length)[0]
+            # Extract Flight Data
+            alt_arr = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
+            stab_arr = np.array(data.get(self.FlightDataType.TYPE_STABILITY))
+            vel_arr = np.array(data.get(self.FlightDataType.TYPE_VELOCITY_TOTAL))
             
-            if len(rail_indices) > 0:
-                start_index = rail_indices[0]
-            else:
-                start_index = 0
-
-            if end_index > start_index:
-                boost_stability = stab_arr[start_index:end_index]
-            else:
-                boost_stability = [] # Flight was too short to measure
-
-            rail_exit_vel = vel_arr[start_index] if start_index < len(vel_arr) else 0.0
-            valid_stab = boost_stability[~np.isnan(boost_stability)]
-            if len(valid_stab) == 0:
-                print("💥 unstable crash (All NaN)")
+            apogee = max(alt_arr)
+            if apogee < 100:
                 return 100000000.0
-            else:
-                avg_stab = np.mean(valid_stab) # The "General Health"
-                min_stab = np.min(valid_stab)  # The "Worst Moment"
-
-            # 1. PRIMARY OBJECTIVE: APOGEE BOWL
-            # We use a lower power (2 instead of 4) so the gradients are smoother
-            # but scale it so it's the dominant factor near the target.
-            loss = ((abs(apogee - TARGET_ALTITUDE) / 20.0) ** 2) * 100000
- 
-            # 2. THE "FORBIDDEN ZONE": MINIMUM STABILITY
-            # If the rocket is unsafe, the penalty must be a "Wall" that the
-            # optimizer cannot climb over. 1.5 is the safety floor.
-            if min_stab < 1.5:
-                loss += ((1.5 - min_stab) + 10000000) ** 2
-                # print(f"⚠️ Dangerous Instability (Min: {min_stab:.2f})")
-
-            # 3. RULE OF THUMB: OVER-STABILITY (WEATHERCOCKING)
-            # Rockets with > 2.5 stability are too wind-sensitive. 
-            if avg_stab > 2.1:
-                loss += ((avg_stab - 2.1) ** 2) * 10000
                 
-            # 4. GEOMETRIC CONSTRAINTS (Structural Integrity)
-            # Rule: Sweep should not exceed Root Chord (Standard Rocketry Guideline)
-            # Extreme sweeps cause fin flutter and structural failure.
-            if fin_sweep > 2 * root_chord:
-                loss += ((fin_sweep - root_chord) ** 2)* 100
+            if apogee > self.best_apogee:
+                self.best_apogee = apogee
                 
-            # Rule: Tip Chord should generally be smaller than Root Chord
-            # Large tips create high drag and stress on the fin root.
-            if tip_chord > 2 * root_chord:
-                loss += ((tip_chord - root_chord) ** 2) * 100
+        except Exception as e:
+            print(f"❌ Simulation Error: {e}")
+            return 100000000.0
 
-            # 5. VELOCITY CONSTRAINT: RAIL EXIT
-            # If the rocket leaves the rail too slow, it can't stabilize.
-            # Assuming rail_exit_vel was computed earlier in the code:
-            if rail_exit_vel < 13.0:  # 15 m/s is a common safe minimum
-                loss += ((13.0 - rail_exit_vel) + 1000000) ** 2
+        # Compute metrics
+        FlightEventType = jpype.JPackage("net").sf.openrocket.simulation.FlightEvent.Type
+        time_arr = np.array(data.get(self.FlightDataType.TYPE_TIME))
+        sim_config = self.sim.getOptions()
+        rail_length = sim_config.getLaunchRodLength()
+        if rail_length < 2.44: 
+            rail_length = 2.44 # 8 ft minimum for a real rocket
+            print(f"⚠️  Warning: Rail length too short ({rail_length} m). Adjusting to 2.44 m for calculations.")
+        events = data.getEvents()
+        
+        burnout_time = 0.0
+        found_burnout = False
 
-            return loss
+        for event in events:
+            if event.getType() == FlightEventType.BURNOUT:
+                burnout_time = event.getTime()
+                found_burnout = True
+                break
+        
+        if not found_burnout:
+            burnout_time = time_arr[-1]
 
-        # Run the optimizer
+        end_index = np.searchsorted(time_arr, burnout_time)
+        rail_indices = np.where(alt_arr >= rail_length)[0]
+        
+        start_index = rail_indices[0] if len(rail_indices) > 0 else 0
+
+        if end_index > start_index:
+            boost_stability = stab_arr[start_index:end_index]
+        else:
+            boost_stability = []
+
+        rail_exit_vel = vel_arr[start_index] if start_index < len(vel_arr) else 0.0
+        valid_stab = boost_stability[~np.isnan(boost_stability)]
+        
+        if len(valid_stab) == 0:
+            return 100000000.0
+        else:
+            avg_stab = np.mean(valid_stab) 
+            min_stab = np.min(valid_stab)  
+
+        # --- LOSS CALCULATION ---
+        loss = ((abs(apogee - TARGET_ALTITUDE) / 20.0) ** 2) * 100000
+
+        if min_stab < 1.5:
+            loss += ((1.5 - min_stab) + 10000000) ** 2
+        if avg_stab > 2.1:
+            loss += ((avg_stab - 2.1) ** 2) * 10000
+        if fin_sweep > 2 * root_chord:
+            loss += ((fin_sweep - root_chord) ** 2)* 100
+        if tip_chord > 2 * root_chord:
+            loss += ((tip_chord - root_chord) ** 2) * 100
+        if rail_exit_vel < 13.0: 
+            loss += ((13.0 - rail_exit_vel) + 1000000) ** 2
+
+        return loss
+
+    # --- 2. STAGE 1: THE GLOBAL SCANNER (Bayesian) ---
+    def run_stage1_global(self, TARGET_ALTITUDE, iterations=50):
+        print(f"\n🚀 STAGE 1: Global Search ({iterations} Iterations)...")
+        self.best_apogee = 0.0 # Reset tracking
+
+        # Wrapper to convert skopt's dictionary to a flat list for our shared function
+        @use_named_args(self.space)
+        def objective_wrapper(**kwargs):
+            x = [kwargs[dim.name] for dim in self.space]
+            return self.calculate_loss(x, TARGET_ALTITUDE)
+
         res = gp_minimize(
-            objective_function,
+            objective_wrapper,
             self.space,
             n_calls=iterations,            
             n_random_starts=int(iterations * 0.4),
             noise=1e-6,            
             random_state=42        
         )
+        print(f"✅ STAGE 1 COMPLETE. Best Score: {res.fun:.4f}")
+        return res, self.best_apogee
 
-        return (res, best_apogee)
+    # --- 3. STAGE 2: THE LOCAL CLIMBER (Nelder-Mead) ---
+    def run_stage2_local(self, start_params, TARGET_ALTITUDE, max_iter=40, tolerance=1e-3):
+        print(f"\n🏔️ STAGE 2: Nelder-Mead Refinement ({max_iter} max iterations)")
+        print("   Walking the simplex to the local minimum...")
+        
+        # Define physical constraints from your search space so Scipy doesn't go out of bounds
+        bounds = [(dim.low, dim.high) for dim in self.space]
+
+        # Wrapper to enforce strict bounds geometrically 
+        def clamped_objective(x):
+            clamped_x = []
+            for i, val in enumerate(x):
+                low, high = bounds[i]
+                if val < low: val = low
+                if val > high: val = high
+                clamped_x.append(val)
+            return self.calculate_loss(clamped_x, TARGET_ALTITUDE)
+
+        # Run the geometric walk
+        result = minimize(
+            clamped_objective, 
+            x0=start_params, 
+            method='Nelder-Mead', 
+            options={
+                'maxiter': max_iter, 
+                'disp': True,        # Prints Scipy's convergence messages
+                'xatol': tolerance,  # Stops if it stops moving
+                'fatol': tolerance   # Stops if the score stops improving
+            }
+        )
+
+        print(f"\n🎉 STAGE 2 FINISHED.")
+        print(f"   Success: {result.success}")
+        print(f"   Final Score: {result.fun:.4f}")
+        return result.x
     
-    # --- ADD THIS TO Optimizer.py ---
     def verify_and_save(self, best_params, filename="optimized_rocket.ork"):
         print("\n" + "="*40)
         print("🔍 VERIFYING BEST SOLUTION")
         print("="*40)
 
-        # 1. UNPACK PARAMETERS
+        # UNPACK PARAMETERS
         # ⚠️ CRITICAL: This must match the order in self.space EXACTLY
-        # If you switched to Ratios, update these variable names!
         top_tube_length, bottom_tube_length, fin_height, root_chord, tip_chord, \
         fin_sweep, fin_bottom_offset, vary_mass, vary_position = best_params
-
-        fins = self.get_component("Trapezoidal Fin Set") 
-        parent = fins.getParent()
-        calculated_pos_display = None
-        if parent:
-            parent_len = parent.getLength()
-            # Formula: Length - Root - Offset
-            calculated_pos_display = parent_len - root_chord - fin_bottom_offset
         
-        print(f"📝 Applying parameters:\n"
-            f"   - Top Tube Len: {top_tube_length * 100:.2f} cm\n"
-            f"   - Bottom Tube Len:  {bottom_tube_length * 100:.2f} cm\n"
-            f"   - Fin Height: {fin_height * 100:.2f} cm\n"
-            f"   - Fin Root: {root_chord * 100:.2f} cm\n"
-            f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
-            f"   - Sweep:    {fin_sweep * 100:.2f} cm\n"
-            f"   - Fin Pos from top:  {calculated_pos_display * 100:.2f} cm (Offset: {fin_bottom_offset * 100:.2f} cm)\n"
-            f"   - Var Mass: {vary_mass * 1000:.0f} g\n"
-            f"   - Var Pos:  {vary_position * 100:.2f} cm\n")
-        
-        # 2. APPLY TO ROCKET (Same logic as objective_function)
+        # APPLY TO ROCKET 
         # --- TUBE ---
         top_tube = self.get_component("Top Tube")
         bottom_tube = self.get_component("Bottom Tube")
@@ -267,7 +262,8 @@ class Optimizer:
             bottom_tube.setLength(bottom_tube_length)
 
         # --- FINS ---
-        fins = self.get_component("Trapezoidal Fin Set") 
+        fins = self.get_component("Trapezoidal Fin Set")
+        calculated_pos = None
         if fins:
             fins.setHeight(fin_height)
             fins.setRootChord(root_chord)
@@ -283,13 +279,24 @@ class Optimizer:
                 fins.setAxialOffset(calculated_pos)
 
         # --- MASS ---
-        mass_comp = self.get_component("Var Mass") # Verify this name!
+        mass_comp = self.get_component("Var Mass")
         if mass_comp:
             mass_comp.setMassOverridden(True)
             mass_comp.setOverrideMass(vary_mass)
             mass_comp.setAxialOffset(vary_position)
 
-        # 3. REFRESH & RUN SIMULATION
+        print(f"📝 Applying parameters:\n"
+            f"   - Top Tube Len: {top_tube_length * 100:.2f} cm\n"
+            f"   - Bottom Tube Len:  {bottom_tube_length * 100:.2f} cm\n"
+            f"   - Fin Height: {fin_height * 100:.2f} cm\n"
+            f"   - Fin Root: {root_chord * 100:.2f} cm\n"
+            f"   - Fin Tip:  {tip_chord * 100:.2f} cm\n"
+            f"   - Sweep:    {fin_sweep * 100:.2f} cm\n"
+            f"   - Fin Pos from top:  {calculated_pos * 100:.2f} cm (Offset: {fin_bottom_offset * 100:.2f} cm)\n"
+            f"   - Var Mass: {vary_mass * 1000:.0f} g\n"
+            f"   - Var Pos:  {vary_position * 100:.2f} cm\n")
+        
+        # REFRESH & RUN SIMULATION
         self.sim = self.doc.getSimulation(0) # Get fresh sim instance
         self.sim.getOptions().setLaunchRodLength(1) 
         
@@ -321,6 +328,9 @@ class Optimizer:
         
         # Rail Exit Index
         rail_len = self.sim.getOptions().getLaunchRodLength()
+        if rail_len < 2.44:
+            rail_len = 2.44 # 8 ft minimum for a real rocket
+            print(f"⚠️  Warning: Rail length too short ({rail_len} m). Adjusting to 2.44 m for calculations.")
         alt = np.array(data.get(self.FlightDataType.TYPE_ALTITUDE))
         rail_indices = np.where(alt >= rail_len)[0]
         start_idx = rail_indices[0] if len(rail_indices) > 0 else 0
@@ -363,27 +373,15 @@ class Optimizer:
         print(f"💾 Saving optimized design to '{filename}'...")
 
         try:
-            # 1. Setup Stream
             fos = jpype.JPackage("java.io").FileOutputStream(filename)
-            
-            # 2. Setup Helper Objects (REQUIRED by the function signature)
-            # We need to create empty containers for warnings/errors/options
             StorageOptions = jpype.JPackage("net.sf.openrocket.document").StorageOptions
             options = StorageOptions() # Default options
-            
             WarningSet = jpype.JPackage("net.sf.openrocket.logging").WarningSet
             warnings = WarningSet()
-            
             ErrorSet = jpype.JPackage("net.sf.openrocket.logging").ErrorSet
             errors = ErrorSet()
-            
-            # 3. Get the Saver
             Saver = jpype.JPackage("net.sf.openrocket.file.openrocket").OpenRocketSaver()
-            
-            # 4. SAVE (Pass all 5 arguments)
-            # Signature: save(OutputStream, Document, StorageOptions, WarningSet, ErrorSet)
             Saver.save(fos, self.doc, options, warnings, errors)
-            
             fos.close()
             print("Done.")
             
