@@ -171,16 +171,16 @@ class Optimizer:
         # --- LOSS CALCULATION ---
         loss = ((abs(apogee - TARGET_ALTITUDE) / 20.0) ** 2) * 100000
 
-        if min_stab < 1.5:
-            loss += ((1.5 - min_stab) + 10000000) ** 2
-        if avg_stab > 2.1:
-            loss += ((avg_stab - 2.1) ** 2) * 10000
+        if min_stab < 1.6:
+            loss += ((1.6 - min_stab) + 10000) ** 2
+        if avg_stab > 2:
+            loss += ((avg_stab - 2) + 100) ** 2
         if fin_sweep > 2 * root_chord:
-            loss += ((fin_sweep - root_chord) ** 2)* 100
+            loss += ((fin_sweep - root_chord) + 10000) ** 2
         if tip_chord > 2 * root_chord:
-            loss += ((tip_chord - root_chord) ** 2) * 100
+            loss += ((tip_chord - root_chord) + 10000) ** 2
         if rail_exit_vel < 13.0: 
-            loss += ((13.0 - rail_exit_vel) + 1000000) ** 2
+            loss += ((13.0 - rail_exit_vel) + 10000) ** 2
 
         return loss
 
@@ -214,19 +214,33 @@ class Optimizer:
         # Define physical constraints from your search space so Scipy doesn't go out of bounds
         bounds = [(dim.low, dim.high) for dim in self.space]
 
-        # Wrapper to enforce strict bounds geometrically 
-        def clamped_objective(x):
-            clamped_x = []
+        # Wrapper with an "Electric Fence" penalty
+        def bounded_objective(x):
+            penalty = 0.0
+            is_out_of_bounds = False
+            
+            # 1. Check every variable against its min/max limits
             for i, val in enumerate(x):
                 low, high = bounds[i]
-                if val < low: val = low
-                if val > high: val = high
-                clamped_x.append(val)
-            return self.calculate_loss(clamped_x, TARGET_ALTITUDE)
+                if val < low:
+                    # Penalize based on how far out of bounds it went
+                    penalty += (low - val) * 10000000
+                    is_out_of_bounds = True
+                elif val > high:
+                    penalty += (val - high) * 10000000
+                    is_out_of_bounds = True
+            
+            # 2. If it stepped out of bounds, DO NOT run the simulation.
+            # Just return the massive penalty so the optimizer retreats.
+            if is_out_of_bounds:
+                return 1000000000.0 + penalty
+
+            # 3. If it is safely inside the bounds, run the actual physics
+            return self.calculate_loss(x, TARGET_ALTITUDE)
 
         # Run the geometric walk
         result = minimize(
-            clamped_objective, 
+            bounded_objective, 
             x0=start_params, 
             method='Nelder-Mead', 
             options={

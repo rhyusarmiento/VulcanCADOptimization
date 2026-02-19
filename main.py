@@ -17,7 +17,6 @@ print("Initializing OpenRocket...")
 try:
     with orhelper.OpenRocketInstance(str(JAR_PATH)) as instance:
         print("✅ SUCCESS: OpenRocket backend is connected and ready!")
-
         # Load the rocket
         if not ROCKET_FILE.exists():
             print(f"❌ Warning: Could not find {ROCKET_FILE}")
@@ -27,10 +26,11 @@ try:
             # orh = orhelper.Helper(instance)
             # doc = orh.load_doc(str(ROCKET_FILE))
             # sim = doc.getSimulation(0)
+
             Opt = Optimizer(instance, str(ROCKET_FILE))
 
             # 1. Parachute Drop (Find the safe zone)
-            best_stage1_params, s1_apogee = Opt.run_stage1_global(TARGET_ALTITUDE, iterations=60)
+            best_stage1_params, s1_apogee = Opt.run_stage1_global(TARGET_ALTITUDE, iterations=100)
 
             # 2. Mountain Hike (Get to the absolute peak)
             # We pass the exact parameters from Stage 1 into Stage 2
